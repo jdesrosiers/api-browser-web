@@ -1,0 +1,18 @@
+{
+  "root": true,
+  "extends": [
+    "plugin:vue/essential",
+    "eslint:recommended"
+  ],
+  "rules": {
+    "semi": ["error", "always"],
+    "quotes": ["error", "double"],
+    "block-spacing": ["error", "always"],
+    "brace-style": ["error", "1tbs"],
+    "object-curly-spacing": ["error", "always"],
+    "array-bracket-spacing": ["error", "never"],
+    "no-trailing-spaces": "error",
+    "no-tabs": "error",
+    "comma-dangle": ["error", "never"]
+  }
+}
