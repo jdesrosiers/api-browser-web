@@ -6,6 +6,7 @@
        :value="value"
        :placeholder="placeholder"
        @input="onInput"
+       @keyup="onKeyup"
        aria-label="URL"
        aria-describedby="basic-addon2">
   </div>
@@ -20,7 +21,10 @@
     },
     methods: {
       onInput(event) {
-        this.$emit("input", event.target.value);
+        this.$emit(event.type, event.target.value);
+      },
+      onKeyup(event) {
+        this.$emit(event.type, event);
       }
     }
   };
