@@ -5,6 +5,8 @@ API Browser Web Client
 
 This is a web interface for the API Browser.
 
+**Note**: This application is deployed to GitHub pages, at https://jdesrosiers.github.io/api-browser-web/
+
 Development
 -----------
 
