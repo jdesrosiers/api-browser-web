@@ -3,10 +3,8 @@
     <input
        type="text"
        class="form-control"
-       :value="value"
        :placeholder="placeholder"
-       @input="onInput"
-       @keyup="onKeyup"
+       @keyup.enter="onKeyup"
        aria-label="URL"
        aria-describedby="basic-addon2">
   </div>
@@ -15,16 +13,10 @@
 <script>
   export default {
     name: "UrlBar",
-    props: {
-      value: String,
-      placeholder: String
-    },
+    props: { placeholder: String },
     methods: {
-      onInput(event) {
-        this.$emit(event.type, event.target.value);
-      },
       onKeyup(event) {
-        this.$emit(event.type, event);
+        this.$emit("input", event.target.value);
       }
     }
   };

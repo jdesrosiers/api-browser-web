@@ -3,33 +3,59 @@ import { mount } from "@vue/test-utils";
 import UrlBar from "@/components/UrlBar.vue";
 
 
-describe("UrlBar", () => {
-  const placeholder = "http://";
-  const wrapper = mount({
-    template: `<UrlBar v-model="url" placeholder="${placeholder}" @keyup.enter="keyup" />`,
-    data: () => ({ url: "" }),
-    methods: {
-      keyup(event) {
-        this.keyupValue = event.keyCode;
-      }
-    },
-    components: { UrlBar }
-  });
-  const input = wrapper.find("input");
+describe("Given a UrlBar", () => {
+  let urlBar;
 
-  it("sets the input's value to the given url", () => {
-    const url = "http://example.com";
-    input.element.value = url;
-    input.trigger("input");
-    expect(wrapper.vm.url).to.equal(url);
+  beforeEach(() => {
+    urlBar = mount(UrlBar);
   });
 
-  it("emits keyup events", () => {
-    input.trigger("keyup.enter");
-    expect(wrapper.vm.keyupValue).to.equal(13);
+  describe("When a placeholder is given", () => {
+    const placeholder = "http://";
+
+    beforeEach(() => {
+      urlBar.setProps({ placeholder });
+    });
+
+    it("Then it should be set as the input's placeholder", () => {
+      expect(urlBar.find("input").element.placeholder).to.equal(placeholder);
+    });
+  });
+});
+
+describe("Given a wrapper component with a UrlBar that binds to `url`", () => {
+  let wrapper;
+  const url = "http://example.com";
+
+  beforeEach(() => {
+    wrapper = mount({
+      template: `<UrlBar v-model="url" />`,
+      data: () => ({ url: "" }),
+      components: { UrlBar }
+    });
   });
 
-  it("sets the input's placeholder to the given placeholder", () => {
-    expect(input.element.placeholder).to.equal(placeholder);
+  describe("When text is entered in the UrlBar", () => {
+    let input;
+
+    beforeEach(() => {
+      input = wrapper.find("input");
+
+      input.element.value = url;
+    });
+
+    it("Then `url` should not be updated to the value in the UrlBar", () => {
+      expect(wrapper.vm.url).to.equal("");
+    });
+
+    describe("And the <Enter> key is pressed in the UrlBar", () => {
+      beforeEach(() => {
+        input.trigger("keyup.enter");
+      });
+
+      it("Then `url` should update to the value in the UrlBar", () => {
+        expect(wrapper.vm.url).to.equal(url);
+      });
+    });
   });
 });

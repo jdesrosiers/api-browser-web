@@ -5,35 +5,44 @@ import Code from "@/components/Code.vue";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
 
 
-describe("When the App loads", () => {
-  const app = mount(App);
+describe("Given an App", () => {
+  let app;
 
-  it("should display WelcomeBanner", () => {
-    expect(app.contains(WelcomeBanner)).to.equal(true);
+  beforeEach(() => {
+    app = mount(App);
   });
 
-  it("should not display Code", () => {
-    expect(app.contains(Code)).to.equal(false);
-  });
+  describe("When there is no body", () => {
+    it("Then display WelcomeBanner", () => {
+      expect(app.contains(WelcomeBanner)).to.equal(true);
+    });
 
-  describe("When a resource is requested", () => {
-    //it("should put the result in the body variable", () => {
-      //app.vm.request();
-      //expect(app.vm.body).to.equal("some-body");
-    //});
-
-    describe("When the body variable has been populated", () => {
-      before(() => {
-        app.setData({ body: "foo" });
-      });
-
-      it("should not display WelcomeBanner", () => {
-        expect(app.contains(WelcomeBanner)).to.equal(false);
-      });
-
-      it("should display Code", () => {
-        expect(app.contains(Code)).to.equal(true);
-      });
+    it("Then don't display Code", () => {
+      expect(app.contains(Code)).to.equal(false);
     });
   });
+
+  describe("When there is a body", () => {
+    beforeEach(() => {
+      app.setData({ body: "some-body" });
+    });
+
+    it("Then don't display WelcomeBanner", () => {
+      expect(app.contains(WelcomeBanner)).to.equal(false);
+    });
+
+    it("Then display Code", () => {
+      expect(app.contains(Code)).to.equal(true);
+    });
+  });
+
+  //describe("When the url is updated", () => {
+    //beforeEach(async () => {
+      //app.vm.url = "http://localhost:3000";
+    //});
+
+    //it("Then fetch the resource and put the result in body", () => {
+      //expect(app.vm.body).to.equal("some-body");
+    //});
+  //});
 });
