@@ -6,7 +6,7 @@
     </nav>
 
     <main role="main">
-      <Code v-if="body">{{ body }}</Code>
+      <Code v-if="body" :language="language" :code="body"></Code>
       <WelcomeBanner v-else />
     </main>
   </div>
@@ -17,14 +17,27 @@
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
 
+  const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
+
   export default {
-    data: () => ({ url: "", body: "" }),
+    data: () => ({
+      url: "",
+      body: "",
+      language: "",
+      response: undefined
+    }),
     components: { Code, UrlBar, WelcomeBanner },
     watch: {
       url(url) {
         fetch(url, { headers: { Accept: "application/json" } })
-          .then((response) => response.text())
-          .then((body) => this.body = body);
+          .then((response) => this.response = response);
+      },
+      response(response) {
+        response.text()
+          .then((body) => {
+            this.language = subtypeName(this.response.headers.get("content-type"));
+            this.body = body;
+          });
       }
     }
   };
