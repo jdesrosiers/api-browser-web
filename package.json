@@ -5,10 +5,11 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test": "vue-cli-service test",
+    "test": "vue-cli-service test --require ignore-styles",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "highlight.js": "^9.12.0",
     "vue": "^2.5.13"
   },
   "devDependencies": {
@@ -18,6 +19,7 @@
     "@vue/cli-service": "^3.0.0-beta.6",
     "@vue/test-utils": "^1.0.0-beta.10",
     "chai": "^4.1.2",
+    "ignore-styles": "^5.0.1",
     "vue-template-compiler": "^2.5.13"
   },
   "browserslist": [

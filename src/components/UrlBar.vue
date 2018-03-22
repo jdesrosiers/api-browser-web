@@ -3,6 +3,7 @@
     <input
        type="text"
        class="form-control"
+       :value="value"
        :placeholder="placeholder"
        @keyup.enter="onKeyup"
        aria-label="URL"
@@ -13,7 +14,10 @@
 <script>
   export default {
     name: "UrlBar",
-    props: { placeholder: String },
+    props: {
+      value: String,
+      placeholder: String
+    },
     methods: {
       onKeyup(event) {
         this.$emit("input", event.target.value);
