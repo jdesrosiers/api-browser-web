@@ -58,4 +58,17 @@ describe("Given a wrapper component with a UrlBar that binds to `url`", () => {
       });
     });
   });
+
+  describe("When the wrapper's url changes", () => {
+    let input;
+
+    beforeEach(() => {
+      input = wrapper.find("input");
+      wrapper.setData({ url: "some-url" });
+    });
+
+    it("Then the text in the UrlBar should update", () => {
+      expect(input.element.value).to.equal("some-url");
+    });
+  });
 });
