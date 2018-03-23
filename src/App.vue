@@ -27,10 +27,28 @@
       response: undefined
     }),
     components: { Code, UrlBar, WelcomeBanner },
-    watch: {
-      url(url) {
+    mounted() {
+      window.addEventListener("hashchange", this.handleHashChange);
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    },
+    beforeDestroy() {
+      window.removeEventListener("hashchange", this.handleHashChange);
+    },
+    methods: {
+      handleHashChange() {
+        const encodedUrl = window.location.hash.substring(1);
+        this.url = decodeURIComponent(encodedUrl);
+      },
+      request(url) {
         fetch(url, { headers: { Accept: "application/json" } })
           .then((response) => this.response = response);
+      }
+    },
+    watch: {
+      url(url) {
+        window.location.hash = encodeURIComponent(url);
+
+        this.request(url);
       },
       response(response) {
         response.text()
