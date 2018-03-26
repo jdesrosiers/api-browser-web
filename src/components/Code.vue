@@ -17,7 +17,10 @@
 
   export default {
     name: "Code",
-    props: { code: String, language: String },
+    props: {
+      code: String,
+      language: String
+    },
     methods: {
       highlight(code) {
         return hljs.highlightAuto(code).value;

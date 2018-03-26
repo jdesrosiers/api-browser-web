@@ -2,8 +2,9 @@ import { expect } from "chai";
 import { mount } from "@vue/test-utils";
 import App from "@/App.vue";
 import Code from "@/components/Code.vue";
+import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
-import { Given, When, Then, wait } from "./test-utils.js";
+import { Given, When, Then, And, wait } from "./test-utils.js";
 
 
 Given("an App", () => {
@@ -11,6 +12,9 @@ Given("an App", () => {
 
   const hashUrl = "#http%3A%2F%2Fexample.com";
   const url = "http://example.com";
+
+  const anotherHashUrl = "#http%3A%2F%2Fanother-example.com";
+  const expectedUrl = "http://another-example.com";
 
   beforeEach(async () => {
     window.location.hash = hashUrl;
@@ -29,31 +33,31 @@ Given("an App", () => {
     window.location.hash = "";
   });
 
-  When("there is no body", () => {
-    Then("display WelcomeBanner", () => {
+  When("there is no URL", () => {
+    beforeEach(() => {
+      app.setData({ url: "" });
+    });
+
+    Then("display the WelcomeBanner", () => {
       expect(app.contains(WelcomeBanner)).to.equal(true);
     });
 
-    Then("don't display Code", () => {
+    Then("don't display the Code", () => {
       expect(app.contains(Code)).to.equal(false);
     });
   });
 
-  When("there is a body", () => {
-    beforeEach(() => {
-      app.setData({ body: "some-body" });
-    });
-
-    Then("don't display WelcomeBanner", () => {
+  When("there is a URL", () => {
+    Then("don't display the WelcomeBanner", () => {
       expect(app.contains(WelcomeBanner)).to.equal(false);
     });
 
-    Then("display Code", () => {
+    Then("display the Code", () => {
       expect(app.contains(Code)).to.equal(true);
     });
   });
 
-  When("the url is updated", () => {
+  When("the URL in the API bar is updated to a valid URL", () => {
     const anotherUrl = "http://another-example.com";
     const expectedHashUrl = "#http%3A%2F%2Fanother-example.com";
 
@@ -61,47 +65,118 @@ Given("an App", () => {
       app.setData({ url: anotherUrl });
     });
 
-    Then("the hash location should be set to the url-encoded url", () => {
+    Then("the hash location should be set to the encoded URL", () => {
       expect(window.location.hash).to.equal(expectedHashUrl);
+    });
+
+    And("the <Enter> key is pressed in the UrlBar", () => {
+      let spy;
+      let input;
+
+      beforeEach(() => {
+        spy = sinon.spy(app.vm, "request");
+
+        input = app.find("input");
+        input.trigger("keyup.enter");
+      });
+
+      afterEach(() => {
+        app.vm.request.restore();
+      });
+
+      Then("a request should be made", () => {
+        expect(spy.calledOnce, "spy is not being called 1 time").to.be.true;
+      });
+
+      Then("the request should be made to the correct URL", () => {
+        expect(spy.calledWith(anotherUrl), "spy was not called with the correct URL").to.be.true;
+      });
     });
   });
 
-  When("the hash location exists when the component is mounted", () => {
-    Then("the hash location should be url-decoded and update the app url", () => {
+  When("the URL in the API bar is updated to an invalid URL", () => {
+    beforeEach(() => {
+      app.setData({ url: "abc" });
+    });
+
+    And("the <Enter> key is pressed in the UrlBar", () => {
+      let input;
+
+      beforeEach(() => {
+        input = app.find("input");
+        input.trigger("keyup.enter");
+      });
+
+      Then("an error message should be displayed", () => {
+        expect(app.text()).to.contain("ERROR");
+      });
+
+      Then("the message should be displayed as text", () => {
+        let code = app.find("Code");
+
+        expect(code.element.classList.contains("text")).to.be.true;
+      });
+    });
+  });
+
+  When("the component is mounted and the hash is set", () => {
+    Then("the URL should be decoded", () => {
       expect(app.vm.url).to.equal(url);
     });
   });
 
-  When("the hash location is changed after mount", () => {
-    const anotherHashUrl = "#http%3A%2F%2Fanother-example.com";
-    const expectedUrl = "http://another-example.com";
-
+  When("the hash is changed to an encoded URL", () => {
     beforeEach(async () => {
       window.location.hash = anotherHashUrl;
       await wait(0);
     });
 
-    Then("it should be url-decoded and it should update the app url", () => {
+    Then("the URL should be decoded", () => {
       expect(app.vm.url).to.equal(expectedUrl);
     });
   });
 
-  When("setting a generic error message", () => {
-    beforeEach(() => {
-      app.setMethods({
-        request: app.vm.setGenericErrorMessage
+  When("the hash is changed", () => {
+    let spy;
+
+    beforeEach(async () => {
+      spy = sinon.spy(app.vm, "request");
+    });
+
+    afterEach(() => {
+      app.vm.request.restore();
+    });
+
+    And("the URL is valid", () => {
+      beforeEach(async () => {
+        window.location.hash = anotherHashUrl;
+        await wait(0);
       });
 
-      app.setData({ url: "test-url" });
+      Then("a request should be made", () => {
+        expect(spy.calledOnce, "spy is not being called 1 time").to.be.true;
+      });
     });
 
-    Then("display an error message", () => {
-      expect(app.text()).contains("ERROR");
-    });
+    And("the URL is invalid", () => {
+      beforeEach(async () => {
+        window.location.hash = "abc";
+        await wait(0);
+      });
 
-    Then("display the code as text", () => {
-      const code = app.find("code");
-      expect(code.element.classList.contains("text")).to.be.true;
+      Then("no request should be made", () => {
+        expect(spy.notCalled, "spy is being called at least 1 time").to.be.true;
+      });
+
+      Then("an error message should be displayed", () => {
+        expect(app.text()).to.contain("ERROR");
+      });
+
+      Then("the message should be displayed as text", () => {
+        let code = app.find("Code");
+
+        expect(code.element.classList.contains("text")).to.be.true;
+      });
     });
   });
 });

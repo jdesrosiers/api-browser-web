@@ -22,6 +22,64 @@ Given("a UrlBar", () => {
       expect(urlBar.find("input").element.placeholder).to.equal(placeholder);
     });
   });
+
+  When("a valid URL is typed into the UrlBar", () => {
+    let input;
+
+    beforeEach(() => {
+      input = urlBar.find("input");
+
+      input.element.value = "http://www.test.com";
+    });
+
+    And("the <Enter> key is pressed in the UrlBar", () => {
+      beforeEach(() => {
+        input.trigger("keyup.enter");
+      });
+
+      Then("the input element should be registered as valid", () => {
+        const isInputValid = !input.element.classList.contains("is-invalid");
+
+        expect(isInputValid).to.be.true;
+      });
+
+      Then("two events are emitted", () => {
+        const emittedEvents = urlBar.emitted();
+        const numberOfEmittedEvents = Object.keys(emittedEvents).length;
+
+        expect(numberOfEmittedEvents).to.equal(2);
+      });
+    });
+  });
+
+  When("an invalid URL is typed into the UrlBar", () => {
+    let input;
+
+    beforeEach(() => {
+      input = urlBar.find("input");
+
+      input.element.value = "abc";
+    });
+
+    And("the <Enter> key is pressed in the UrlBar", () => {
+      beforeEach(() => {
+        input.trigger("keyup.enter");
+      });
+
+      Then("the input element should be registered as invalid", () => {
+        const isInputValid = !input.element.classList.contains("is-invalid");
+
+        expect(isInputValid).to.be.false;
+      });
+
+      Then("two events are emitted", () => {
+        const emittedEvents = urlBar.emitted();
+        const numberOfEmittedEvents = Object.keys(emittedEvents).length;
+
+        expect(numberOfEmittedEvents).to.equal(2);
+      });
+    });
+  });
 });
 
 Given("a wrapper component with a UrlBar that binds to `url`", () => {
@@ -60,7 +118,7 @@ Given("a wrapper component with a UrlBar that binds to `url`", () => {
     });
   });
 
-  When("the wrapper's url changes", () => {
+  When("the wrapper's URL changes", () => {
     let input;
 
     beforeEach(() => {
@@ -70,6 +128,18 @@ Given("a wrapper component with a UrlBar that binds to `url`", () => {
 
     Then("the text in the UrlBar should update", () => {
       expect(input.element.value).to.equal("some-url");
+    });
+
+    And("the URL is invalid", () => {
+      beforeEach(() => {
+        wrapper.setData({ url: "invalid-url" });
+      });
+
+      Then("the input element should be registered as invalid", () => {
+        const isInputValid = !input.element.classList.contains("is-invalid");
+
+        expect(isInputValid).to.be.false;
+      });
     });
   });
 });

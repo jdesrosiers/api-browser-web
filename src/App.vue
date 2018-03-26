@@ -2,11 +2,16 @@
   <div id="app">
     <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
       <a class="navbar-brand" href="/">API Browser</a>
-      <UrlBar v-model="url" placeholder="http://" />
+      <UrlBar
+        v-model="url"
+        placeholder="http://"
+        @make-a-request="makeARequest($event)"
+        @set-invalid-url-error-message="setErrorMessage(invalidUrlErrorMessage)"
+      />
     </nav>
 
     <main role="main">
-      <Code v-if="body" :language="language" :code="body"></Code>
+      <Code v-if="url !== ''" :language="language" :code="body"></Code>
       <WelcomeBanner v-else />
     </main>
   </div>
@@ -16,16 +21,20 @@
   import Code from "./components/Code.vue";
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
+  import { validateUri } from "./validator.js";
 
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
-  const errorMessage = "ERROR: No response was returned. Please check the browser console.";
+  const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
+  const invalidUrlErrorMessage = "ERROR: Invalid URL entered.";
 
   export default {
     data: () => ({
       url: "",
       body: "",
       language: "",
-      response: undefined
+      response: undefined,
+      noResponseErrorMessage: noResponseErrorMessage,
+      invalidUrlErrorMessage: invalidUrlErrorMessage
     }),
     components: { Code, UrlBar, WelcomeBanner },
     mounted() {
@@ -39,22 +48,29 @@
       handleHashChange() {
         const encodedUrl = window.location.hash.substring(1);
         this.url = decodeURIComponent(encodedUrl);
+
+        if (validateUri(this.url)) {
+          this.request(this.url);
+        } else {
+          this.setErrorMessage(invalidUrlErrorMessage);
+        }
       },
       request(url) {
         fetch(url, { headers: { Accept: "application/json" } })
           .then((response) => this.response = response)
-          .catch(() => this.setGenericErrorMessage());
+          .catch(() => this.setErrorMessage(noResponseErrorMessage));
       },
-      setGenericErrorMessage() {
-        this.body = errorMessage;
+      makeARequest(url) {
+        this.request(url);
+      },
+      setErrorMessage(message) {
+        this.body = message;
         this.language = "text";
       }
     },
     watch: {
       url(url) {
         window.location.hash = encodeURIComponent(url);
-
-        this.request(url);
       },
       response(response) {
         response.text()
