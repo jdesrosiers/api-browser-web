@@ -4,72 +4,58 @@ import UrlBar from "@/components/UrlBar.vue";
 import { Given, When, Then, And } from "../test-utils.js";
 
 
-Given("a UrlBar", () => {
-  let urlBar;
-
-  beforeEach(() => {
-    urlBar = mount(UrlBar);
-  });
-
-  When("a placeholder is given", () => {
-    const placeholder = "http://";
-
-    beforeEach(() => {
-      urlBar.setProps({ placeholder });
-    });
-
-    Then("it should be set as the input's placeholder", () => {
-      expect(urlBar.find("input").element.placeholder).to.equal(placeholder);
-    });
-  });
-});
-
-Given("a wrapper component with a UrlBar that binds to `url`", () => {
+Given("a component with a UrlBar that binds to `url`", () => {
   let wrapper;
   const url = "http://example.com";
+  const placeholder = "http://";
 
   beforeEach(() => {
     wrapper = mount({
-      template: `<UrlBar v-model="url" />`,
+      template: `<UrlBar v-model="url" placeholder="${placeholder}" />`,
       data: () => ({ url: "" }),
       components: { UrlBar }
     });
   });
 
-  When("text is entered in the UrlBar", () => {
+  When("a placeholder is given", () => {
+    Then("it should be set as the input's placeholder", () => {
+      expect(wrapper.find("input").element.placeholder).to.equal(placeholder);
+    });
+  });
+
+  When("a URL is entered in the UrlBar", () => {
     let input;
 
     beforeEach(() => {
       input = wrapper.find("input");
 
-      input.element.value = url;
+      wrapper.setData({ url });
     });
 
-    Then("`url` should not be updated to the value in the UrlBar", () => {
-      expect(wrapper.vm.url).to.equal("");
-    });
-
-    And("the <Enter> key is pressed in the UrlBar", () => {
+    And("the <Enter> key is pressed", () => {
       beforeEach(() => {
         input.trigger("keyup.enter");
       });
 
-      Then("`url` should update to the value in the UrlBar", () => {
-        expect(wrapper.vm.url).to.equal(url);
+      Then("the UrlBar should emit a keyup.enter event", () => {
+        const urlBar = wrapper.find(UrlBar);
+        const enter = 13;
+        expect(urlBar.emitted().keyup[0][0].keyCode).to.equal(enter);
       });
     });
   });
 
   When("the wrapper's url changes", () => {
     let input;
+    const anotherUrl = "http://some-url.com";
 
     beforeEach(() => {
       input = wrapper.find("input");
-      wrapper.setData({ url: "some-url" });
+      wrapper.setData({ url: anotherUrl });
     });
 
     Then("the text in the UrlBar should update", () => {
-      expect(input.element.value).to.equal("some-url");
+      expect(input.element.value).to.equal(anotherUrl);
     });
   });
 });

@@ -1,26 +1,26 @@
 <template>
   <div class="input-group">
-    <input
-       type="text"
-       class="form-control"
-       :value="value"
-       :placeholder="placeholder"
-       @keyup.enter="onKeyup"
-       aria-label="URL"
-       aria-describedby="basic-addon2">
+    <input type="text"
+           class="form-control"
+           :value="value"
+           v-bind="$attrs"
+           @input="input"
+           @keyup="keyup"
+           aria-label="URL"
+           aria-describedby="basic-addon2">
   </div>
 </template>
 
 <script>
   export default {
     name: "UrlBar",
-    props: {
-      value: String,
-      placeholder: String
-    },
+    props: { value: "" },
     methods: {
-      onKeyup(event) {
+      input(event) {
         this.$emit("input", event.target.value);
+      },
+      keyup(event) {
+        this.$emit("keyup", event);
       }
     }
   };

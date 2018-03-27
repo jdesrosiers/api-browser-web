@@ -17,19 +17,24 @@ Given("an App", () => {
     await wait(0);
 
     app = mount(App, {
-      data: { url },
       methods: {
         request: () => {}
       }
     });
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     app.vm.$destroy();
     window.location.hash = "";
+    await wait(0);
   });
 
-  When("there is no body", () => {
+  When("there is no url", () => {
+    beforeEach(async () => {
+      window.location.hash = "";
+      await wait(0);
+    });
+
     Then("display WelcomeBanner", () => {
       expect(app.contains(WelcomeBanner)).to.equal(true);
     });
@@ -39,7 +44,21 @@ Given("an App", () => {
     });
   });
 
-  When("there is a body", () => {
+  When("there is a url and no body", () => {
+    beforeEach(() => {
+      app.setData({ body: undefined });
+    });
+
+    Then("don't display WelcomeBanner", () => {
+      expect(app.contains(WelcomeBanner)).to.equal(false);
+    });
+
+    Then("don't display Code", () => {
+      expect(app.contains(Code)).to.equal(false);
+    });
+  });
+
+  When("there is a url and a body", () => {
     beforeEach(() => {
       app.setData({ body: "some-body" });
     });
@@ -59,6 +78,7 @@ Given("an App", () => {
 
     beforeEach(() => {
       app.setData({ url: anotherUrl });
+      app.find("input").trigger("keyup.enter");
     });
 
     //Then("fetch the resource and put the result in body", () => {
