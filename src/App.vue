@@ -7,7 +7,7 @@
 
     <main role="main">
       <Code v-if="body" :language="language" :code="body"></Code>
-      <WelcomeBanner v-else />
+      <WelcomeBanner v-else-if="!response" />
     </main>
   </div>
 </template>
@@ -40,6 +40,9 @@
         this.url = decodeURIComponent(encodedUrl);
       },
       request(url) {
+        this.language = "";
+        this.body = "";
+
         fetch(url, { headers: { Accept: "application/json" } })
           .then((response) => this.response = response);
       }
