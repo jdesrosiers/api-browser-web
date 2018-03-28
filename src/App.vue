@@ -18,6 +18,7 @@
   import WelcomeBanner from "./components/WelcomeBanner.vue";
 
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
+  const errorMessage = "ERROR: No response was returned. Please check the browser console.";
 
   export default {
     data: () => ({
@@ -41,7 +42,12 @@
       },
       request(url) {
         fetch(url, { headers: { Accept: "application/json" } })
-          .then((response) => this.response = response);
+          .then((response) => this.response = response)
+          .catch(() => this.setGenericErrorMessage());
+      },
+      setGenericErrorMessage() {
+        this.body = errorMessage;
+        this.language = "text";
       }
     },
     watch: {
