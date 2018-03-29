@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
 import Code from "@/components/Code.vue";
+import { Given, When, Then } from "../test-utils.js";
 
 
-describe("Given a Code", () => {
+Given("a Code", () => {
   let code;
 
   beforeEach(() => {
@@ -15,7 +16,7 @@ describe("Given a Code", () => {
     });
   });
 
-  describe("When JSON is given", () => {
+  When("JSON is given", () => {
     let subject;
 
     const rawJson = `{ "foo": "bar" }`;
@@ -28,24 +29,24 @@ describe("Given a Code", () => {
       subject = code.find("pre > code");
     });
 
-    it("Then the code should be displayed in a pre > code element", () => {
+    Then("the code should be displayed in a pre > code element", () => {
       expect(subject.exists()).to.equal(true);
     });
 
-    it("Then the code should be pretty print fromatted", () => {
+    Then("the code should be pretty print fromatted", () => {
       expect(subject.text()).to.equal(formattedJson);
     });
 
-    it("Then the code element should have the a 'json' css class", () => {
+    Then("the code element should have the a 'json' css class", () => {
       expect(subject.element.classList.contains("json")).to.equal(true);
     });
 
-    it("Then the code element should have the a 'hljs' css class", () => {
+    Then("the code element should have the a 'hljs' css class", () => {
       expect(subject.element.classList.contains("hljs")).to.equal(true);
     });
   });
 
-  describe("When HTML is given", () => {
+  When("HTML is given", () => {
     let subject;
 
     const html = `<p>some html</p>`;
@@ -55,16 +56,16 @@ describe("Given a Code", () => {
       subject = code.find("iframe");
     });
 
-    it("Then the code should be displayed in an iframe", () => {
+    Then("the code should be displayed in an iframe", () => {
       expect(subject.exists()).to.equal(true);
     });
 
-    it("Then the iframe should contain the given html", () => {
+    Then("the iframe should contain the given html", () => {
       expect(subject.element.getAttribute("srcdoc")).to.equal(html);
     });
   });
 
-  describe("When a language other than html is given", () => {
+  When("a language other than html is given", () => {
     let subject;
 
     const language = "not-a-language";
@@ -75,15 +76,15 @@ describe("Given a Code", () => {
       subject = code.find("pre > code");
     });
 
-    it("Then the code should be displayed in a pre > code element", () => {
+    Then("the code should be displayed in a pre > code element", () => {
       expect(subject.exists()).to.equal(true);
     });
 
-    it("Then the code element should have css class that matches the language", () => {
+    Then("the code element should have css class that matches the language", () => {
       expect(subject.element.classList.contains(language)).to.equal(true);
     });
 
-    it("Then the code element should have the a 'hljs' css class", () => {
+    Then("the code element should have the a 'hljs' css class", () => {
       expect(subject.element.classList.contains("hljs")).to.equal(true);
     });
   });
