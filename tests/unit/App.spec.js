@@ -16,6 +16,15 @@ Given("an App", () => {
   const anotherHashUrl = "#http%3A%2F%2Fanother-example.com";
   const expectedUrl = "http://another-example.com";
 
+  const successfulResponse = {
+    status: 200,
+    statusText: "OK"
+  };
+  const errorResponse = {
+    status: 404,
+    statusText: "Not Found"
+  };
+
   beforeEach(async () => {
     window.location.hash = hashUrl;
     await wait(0);
@@ -176,6 +185,87 @@ Given("an App", () => {
         let code = app.find("Code");
 
         expect(code.element.classList.contains("text")).to.be.true;
+      });
+    });
+  });
+
+  When("a successful response is returned", () => {
+    let codeProps;
+
+    beforeEach(async () => {
+      app.setData({
+        body: "some-body",
+        wasResponseAnError: false,
+        statusText: ""
+      });
+
+      app.setMethods({
+        request: app.vm.handleResponse
+      });
+
+      app.vm.request(successfulResponse);
+
+      codeProps = app.find("Code").vnode.context._props;
+    });
+
+    Then("the response was not an error", () => {
+      expect(codeProps.wasResponseAnError).to.equal(false);
+    });
+
+    Then("the status text is set correctly", () => {
+      expect(codeProps.statusText).to.equal("OK");
+    });
+  });
+
+  When("an error response is returned", () => {
+    let codeProps;
+
+    beforeEach(async () => {
+      app.setData({
+        body: "some-body",
+        wasResponseAnError: false,
+        statusText: ""
+      });
+
+      app.setMethods({
+        request: app.vm.handleResponse
+      });
+
+      app.vm.request(errorResponse);
+
+      codeProps = app.find("Code").vnode.context._props;
+    });
+
+    Then("the status text is set correctly", () => {
+      expect(app.text().includes("Not Found")).to.be.true;
+    });
+
+    And("then a 2XX response is returned", () => {
+      beforeEach(async () => {
+        app.vm.request(successfulResponse);
+      });
+
+      Then("the response was not an error", () => {
+        expect(codeProps.wasResponseAnError).to.equal(false);
+      });
+
+      Then("the status text is set correctly", () => {
+        expect(codeProps.statusText).to.equal("OK");
+      });
+    });
+
+    And("then an invalid URL is entered", () => {
+      let input;
+
+      beforeEach(() => {
+        app.setData({ url: "abc" });
+
+        input = app.find("input");
+        input.trigger("keyup.enter");
+      });
+
+      Then("the message for an error response should not be displayed", () => {
+        expect(app.text().includes("Not Found")).to.be.false;
       });
     });
   });
