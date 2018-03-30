@@ -7,6 +7,7 @@
 
     <main role="main">
       <WelcomeBanner v-if="!location" />
+      <Error v-else-if="error">{{ error }}</Error>
       <Code v-else-if="body !== undefined" :language="language" :code="body" />
     </main>
   </div>
@@ -14,6 +15,7 @@
 
 <script>
   import Code from "./components/Code.vue";
+  import Error from "./components/Error.vue";
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import Ajv from "ajv";
@@ -27,11 +29,12 @@
     data: () => ({
       url: "",
       location: "",
+      error: undefined,
       body: undefined,
       language: undefined,
       response: undefined
     }),
-    components: { Code, UrlBar, WelcomeBanner },
+    components: { Code, Error, UrlBar, WelcomeBanner },
     mounted() {
       window.addEventListener("hashchange", this.handleHashChange);
       window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -44,22 +47,27 @@
         const encodedUrl = window.location.hash.substring(1);
         this.location = decodeURIComponent(encodedUrl);
         this.url = this.location;
-        this.language = undefined;
+        this.error = undefined;
         this.body = undefined;
+        this.language = undefined;
 
         if (validateUrl(this.location)) {
           this.request(this.location);
         } else {
-          console.log("INVALID URL");
+          this.doError("Invalid URL. Try again.");
         }
       },
       request(url) {
         fetch(url, { headers: { Accept: "application/json" } })
-          .then((response) => this.response = response);
+          .then((response) => this.response = response)
+          .catch(() => this.doError());
       },
       go(event) {
         const url = event.target.value;
         window.location.hash = encodeURIComponent(url);
+      },
+      doError(error) {
+        this.error = error || "Hmmm, something when wrong. Check the browser console for clues.";
       }
     },
     watch: {
