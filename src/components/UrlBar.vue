@@ -14,7 +14,7 @@
 <script>
   export default {
     name: "UrlBar",
-    props: { value: "" },
+    props: { value: String },
     methods: {
       input(event) {
         this.$emit("input", event.target.value);

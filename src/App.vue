@@ -8,19 +8,17 @@
     <main role="main">
       <WelcomeBanner v-if="!location" />
       <Error v-else-if="error">{{ error }}</Error>
-      <Code v-else-if="body !== undefined" :language="language" :code="body" />
+      <Document v-else-if="response" :response="response" />
     </main>
   </div>
 </template>
 
 <script>
-  import Code from "./components/Code.vue";
+  import Document from "./components/Document.vue";
   import Error from "./components/Error.vue";
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import Ajv from "ajv";
-
-  const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
 
   const ajv = new Ajv();
   const validateUrl = ajv.compile({ "type": "string", "format": "uri" });
@@ -30,11 +28,9 @@
       url: "",
       location: "",
       error: undefined,
-      body: undefined,
-      language: undefined,
       response: undefined
     }),
-    components: { Code, Error, UrlBar, WelcomeBanner },
+    components: { Error, Document, UrlBar, WelcomeBanner },
     mounted() {
       window.addEventListener("hashchange", this.handleHashChange);
       window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -48,8 +44,7 @@
         this.location = decodeURIComponent(encodedUrl);
         this.url = this.location;
         this.error = undefined;
-        this.body = undefined;
-        this.language = undefined;
+        this.response = undefined;
 
         if (validateUrl(this.location)) {
           this.request(this.location);
@@ -68,15 +63,6 @@
       },
       doError(error) {
         this.error = error || "Hmmm, something when wrong. Check the browser console for clues.";
-      }
-    },
-    watch: {
-      response(response) {
-        response.text()
-          .then((body) => {
-            this.language = subtypeName(this.response.headers.get("content-type"));
-            this.body = body;
-          });
       }
     }
   };
