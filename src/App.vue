@@ -15,8 +15,9 @@
         v-if="url !== ''"
         :language="language"
         :code="body"
-        :wasResponseAnError="wasResponseAnError"
-        :statusText="statusText" >
+        :statusText="statusText"
+        :links="links"
+        :wasResponseAnError="wasResponseAnError">
       </Code>
       <WelcomeBanner v-else />
     </main>
@@ -28,6 +29,7 @@
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import { validateUri } from "./validator.js";
+  import { parseRawLinks, resolveUrls } from "./link-utils.js";
 
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
@@ -40,6 +42,7 @@
       language: "",
       response: undefined,
       statusText: "",
+      links: undefined,
       wasResponseAnError: false,
       noResponseErrorMessage: noResponseErrorMessage,
       invalidUrlErrorMessage: invalidUrlErrorMessage
@@ -68,11 +71,18 @@
 
         fetch(url, { headers: { Accept: "application/json" } })
           .then((response) => {
+            let rawLinks = response.headers.get("Link");
+            vm.setLinks(rawLinks);
+
             vm.handleResponse(response);
 
             vm.response = response;
           })
-          .catch(() => this.setErrorMessage(noResponseErrorMessage));
+          .catch(() => {
+            vm.setLinks([]);
+
+            this.setErrorMessage(noResponseErrorMessage);
+          });
       },
       makeARequest(url) {
         this.request(url);
@@ -81,6 +91,11 @@
         this.body = message;
         this.language = "text";
         this.wasResponseAnError = false;
+        this.setLinks([]);
+      },
+      setLinks(rawLinks) {
+        const parsedLinks = parseRawLinks(rawLinks);
+        this.links = resolveUrls(parsedLinks, this.url);
       },
       handleResponse(response) {
         const statusCode = response.status;

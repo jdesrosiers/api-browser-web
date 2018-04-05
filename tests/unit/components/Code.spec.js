@@ -137,4 +137,42 @@ Given("a Code", () => {
       expect(cardHeader.exists()).to.be.false;
     });
   });
+
+  When("a link is returned", () => {
+    let link;
+    let span;
+
+    const exampleLinks = [{
+      href: "/example",
+      rel: "http://example.com",
+      title: "Example"
+    }];
+
+    beforeEach(() => {
+      code.setProps({
+        links: exampleLinks
+      });
+
+      link = code.find("a");
+      span = code.find("span");
+    });
+
+    Then("the link should be displayed", () => {
+      expect(link.exists()).to.be.true;
+    });
+
+    Then("the link's title should be displayed", () => {
+      expect(link.text()).to.equal("Example");
+    });
+
+    Then("the span should contain the correct text", () => {
+      expect(span.text()).to.equal("http://example.com");
+    });
+  });
+
+  When("no links are returned", () => {
+    Then("no links should be displayed", () => {
+      expect(code.contains("a")).to.be.false;
+    });
+  });
 });

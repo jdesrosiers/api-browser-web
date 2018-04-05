@@ -148,7 +148,7 @@ Given("an App", () => {
   When("the hash is changed", () => {
     let spy;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       spy = sinon.spy(app.vm, "request");
     });
 
@@ -205,7 +205,7 @@ Given("an App", () => {
 
       app.vm.request(successfulResponse);
 
-      codeProps = app.find("Code").vnode.context._props;
+      codeProps = app.find(Code).vm._props;
     });
 
     Then("the response was not an error", () => {
@@ -233,7 +233,7 @@ Given("an App", () => {
 
       app.vm.request(errorResponse);
 
-      codeProps = app.find("Code").vnode.context._props;
+      codeProps = app.find(Code).vm._props;
     });
 
     Then("the status text is set correctly", () => {
@@ -267,6 +267,60 @@ Given("an App", () => {
       Then("the message for an error response should not be displayed", () => {
         expect(app.text().includes("Not Found")).to.be.false;
       });
+    });
+  });
+
+  When("a response with link headers is returned", () => {
+    const rawLinks =
+      "</example>; rel=\"http://base.com\"; title=\"Example link\", " +
+      "</test>; rel=\"http://test.com\"; title=\"Test link\"";
+
+    beforeEach(() => {
+      app.setMethods({
+        request: app.vm.setLinks
+      });
+
+      app.vm.request(rawLinks);
+
+      app.update();
+    });
+
+    Then("one link should be displayed", () => {
+      expect(app.text().includes("Example link")).to.be.true;
+    });
+
+    Then("the second link should be displayed", () => {
+      expect(app.text().includes("Test link")).to.be.true;
+    });
+
+    Then("the link's href should be set correctly", () => {
+      expect(app.vm.links[0].href).to.equal("#http%3A%2F%2Fexample.com%2Fexample");
+    });
+
+    And("then an invalid URL is entered", () => {
+      let input;
+
+      beforeEach(() => {
+        app.setData({ url: "abc" });
+
+        input = app.find("input");
+        input.trigger("keyup.enter");
+      });
+
+      Then("no links are displayed", () => {
+        expect(app.text().includes("link")).to.be.false;
+      });
+    });
+  });
+
+  When("a response without link headers is returned", () => {
+    beforeEach(() => {
+      app.vm.request([]);
+      app.update();
+    });
+
+    Then("no links are displayed", () => {
+      expect(app.text().includes("link")).to.be.false;
     });
   });
 });
