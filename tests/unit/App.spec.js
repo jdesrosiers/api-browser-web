@@ -61,10 +61,6 @@ Given("an App", () => {
       app.setData({ url: anotherUrl });
     });
 
-    //Then("fetch the resource and put the result in body", () => {
-      //expect(app.vm.body).to.equal("some-body");
-    //});
-
     Then("the hash location should be set to the url-encoded url", () => {
       expect(window.location.hash).to.equal(expectedHashUrl);
     });
