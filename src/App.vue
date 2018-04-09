@@ -6,31 +6,29 @@
     </nav>
 
     <main role="main">
-      <WelcomeBanner v-if="!location" />
+      <WelcomeBanner v-if="!hasHashLocation" />
       <Error v-else-if="error">{{ error }}</Error>
-      <Document v-else-if="response" :response="response" />
+      <Document v-else-if="browser.location" :browser="browser" />
     </main>
   </div>
 </template>
 
 <script>
+  import * as Application from "../lib/application.js";
+  import * as Browser from "../lib/browser.js";
   import Document from "./components/Document.vue";
   import Error from "./components/Error.vue";
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
-  import Ajv from "ajv";
-
-  const ajv = new Ajv();
-  const validateUrl = ajv.compile({ "type": "string", "format": "uri" });
 
   export default {
     data: () => ({
       url: "",
-      location: "",
+      hasHashLocation: false,
       error: undefined,
-      response: undefined
+      browser: Browser.nil
     }),
-    components: { Error, Document, UrlBar, WelcomeBanner },
+    components: { Document, Error, UrlBar, WelcomeBanner },
     mounted() {
       window.addEventListener("hashchange", this.handleHashChange);
       window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -40,29 +38,20 @@
     },
     methods: {
       handleHashChange() {
-        const encodedUrl = window.location.hash.substring(1);
-        this.location = decodeURIComponent(encodedUrl);
-        this.url = this.location;
+        this.url = Application.getLocation();
+        this.hasHashLocation = !!this.url;
+        this.browser = Browser.nil;
         this.error = undefined;
-        this.response = undefined;
 
-        if (validateUrl(this.location)) {
-          this.request(this.location);
-        } else {
-          this.doError("Invalid URL. Try again.");
-        }
+        this.request()
+          .then((browser) => this.browser = browser)
+          .catch((err) => this.error = err.toString());
       },
-      request(url) {
-        fetch(url, { headers: { Accept: "application/json" } })
-          .then((response) => this.response = response)
-          .catch(() => this.doError());
+      request() {
+        return Browser.follow(this.browser, { href: this.url });
       },
       go(event) {
-        const url = event.target.value;
-        window.location.hash = encodeURIComponent(url);
-      },
-      doError(error) {
-        this.error = error || "Hmmm, something when wrong. Check the browser console for clues.";
+        Application.setLocation(event.target.value);
       }
     }
   };

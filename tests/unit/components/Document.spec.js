@@ -2,7 +2,6 @@ import { expect } from "chai";
 import { mount } from "@vue/test-utils";
 import Document from "@/components/Document.vue";
 import { Given, When, Then, wait } from "../test-utils.js";
-import fetch from "node-fetch";
 
 
 Given("a Document", () => {
@@ -18,11 +17,10 @@ Given("a Document", () => {
     beforeEach(async () => {
       doc = mount(Document, {
         propsData: {
-          response: new fetch.Response(rawJson, {
-            status: 200,
-            statusText: "OK",
-            headers: { "Content-Type": "application/json" }
-          })
+          browser: {
+            headers: { "content-type": "application/json" },
+            body: rawJson
+          }
         },
         methods: {
           highlight: (code) => "highlighted" + code
@@ -58,11 +56,10 @@ Given("a Document", () => {
     beforeEach(async () => {
       doc = mount(Document, {
         propsData: {
-          response: new fetch.Response(html, {
-            status: 200,
-            statusText: "OK",
-            headers: { "Content-Type": "text/html; charset=utf8" }
-          })
+          browser: {
+            headers: { "content-type": "text/html; charset=utf8" },
+            body: html
+          }
         }
       });
       await wait(0);
@@ -88,11 +85,10 @@ Given("a Document", () => {
     beforeEach(async () => {
       doc = mount(Document, {
         propsData: {
-          response: new fetch.Response(code, {
-            status: 200,
-            statusText: "OK",
-            headers: { "Content-Type": `application/${language}` }
-          })
+          browser: {
+            headers: { "content-type": `application/${language}` },
+            body: code
+          }
         }
       });
       await wait(0);
@@ -118,11 +114,10 @@ Given("a Document", () => {
     beforeEach(async () => {
       doc = mount(Document, {
         propsData: {
-          response: new fetch.Response("null", {
-            status: 200,
-            statusText: "OK",
-            headers: { "Content-Type": "application/json" }
-          })
+          browser: {
+            headers: { "content-type": "application/json" },
+            body: `"null"`
+          }
         }
       });
       await wait(0);
@@ -144,11 +139,12 @@ Given("a Document", () => {
     beforeEach(async () => {
       doc = mount(Document, {
         propsData: {
-          response: new fetch.Response("null", {
+          browser: {
             status: 404,
             statusText: "Not Found",
-            headers: { "Content-Type": "application/json" }
-          })
+            headers: { "content-type": "application/json" },
+            body: `"null"`
+          }
         }
       });
       await wait(0);

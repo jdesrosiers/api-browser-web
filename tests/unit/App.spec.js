@@ -1,12 +1,11 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
 import { Given, When, Then, wait } from "./test-utils.js";
-import sinon from "sinon";
 import App from "@/App.vue";
+import * as Browser from "../../lib/browser";
 import Document from "@/components/Document.vue";
 import Error from "@/components/Error.vue";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
-import fetch from "node-fetch";
 
 
 Given("an App", () => {
@@ -21,7 +20,7 @@ Given("an App", () => {
 
     app = mount(App, {
       methods: {
-        request: () => {}
+        request: () => Promise.resolve(Browser.nil)
       }
     });
   });
@@ -53,7 +52,7 @@ Given("an App", () => {
 
   When("there is a response", () => {
     beforeEach(() => {
-      app.setData({ response: "" });
+      app.setData({ browser: "" });
     });
 
     Then("it should display WelcomeBanner", () => {
@@ -88,54 +87,23 @@ Given("an App", () => {
     });
   });
 
-  When("a request is made with an invalid URL", () => {
-    const invalidUrl = "some-invalid-url";
-    const expectedHashUrl = "#some-invalid-url";
-    const requestSpy = sinon.spy();
-
-    beforeEach(async () => {
-      app.setMethods({ request: requestSpy });
-      app.setData({ url: invalidUrl });
-      app.find("input").trigger("keyup.enter");
-      await wait(0);
-    });
-
-    Then("it should not fetch the resource", () => {
-      expect(requestSpy.called).to.equal(false);
-    });
-
-    Then("there should be an error message", () => {
-      expect(app.vm.error).to.have.string("Invalid URL");
-    });
-
-    Then("the hash location should be set to the url-encoded URL", () => {
-      expect(window.location.hash).to.equal(expectedHashUrl);
-    });
-  });
-
-  When("a request is made with a valid URL and the request is successful", () => {
+  When("a request is made and the request is successful", () => {
     const anotherUrl = "http://another-example.com";
     const expectedHashUrl = "#http%3A%2F%2Fanother-example.com";
-    let response;
+    let browser;
 
     beforeEach(async () => {
-      response = new fetch.Response(`"some-body"`, {
-        status: 200,
-        statusText: "OK",
-        headers: { "Content-Type": "application/json" }
-      });
+      browser = {};
       app.setMethods({
-        request() {
-          this.response = response;
-        }
+        request: () => Promise.resolve(browser)
       });
       app.setData({ url: anotherUrl });
       app.find("input").trigger("keyup.enter");
       await wait(0);
     });
 
-    Then("fetch the resource and put the result in response", () => {
-      expect(app.vm.response).to.equal(response);
+    Then("fetch the resource and put the result in browser", () => {
+      expect(app.vm.browser).to.equal(browser);
     });
 
     Then("there should not be an error message", () => {
@@ -147,14 +115,12 @@ Given("an App", () => {
     });
   });
 
-  When("a request is made with a valid URL and the request fails", () => {
+  When("a request is made and the request fails", () => {
     const anotherUrl = "http://another-example.com";
 
     beforeEach(async () => {
       app.setMethods({
-        request() {
-          this.doError();
-        }
+        request: () => Promise.reject("error")
       });
       app.setData({ url: anotherUrl });
       app.find("input").trigger("keyup.enter");
@@ -162,7 +128,7 @@ Given("an App", () => {
     });
 
     Then("there should be an error message", () => {
-      expect(app.vm.error).to.have.string("Check the browser console");
+      expect(app.vm.error).to.have.string("error");
     });
   });
 

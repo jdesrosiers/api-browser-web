@@ -11,24 +11,24 @@
 </template>
 
 <script>
+  import * as HttpParser from "../../lib/parse-http";
   import hljs from "highlight.js";
   import "highlight.js/styles/default.css";
 
-  const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const formatJson = (json) => JSON.stringify(JSON.parse(json), null, "  ");
 
   export default {
     name: "Document",
-    props: ["response"],
+    props: ["browser"],
     data: () => ({ body: "", language: "" }),
     mounted() {
-      this.response.text()
-        .then((body) => {
-          this.language = subtypeName(this.response.headers.get("content-type"));
-          this.body = body;
-        });
+      this.update(this.browser);
     },
     methods: {
+      update(browser) {
+        this.language = HttpParser.subtypeName(browser.headers["content-type"]);
+        this.body = browser.body;
+      },
       highlight(code) {
         return hljs.highlightAuto(code).value;
       }
@@ -45,8 +45,13 @@
         }
       },
       statusText() {
-        const status = this.response.status;
-        return status >= 400 && status < 600 ? this.response.statusText : undefined;
+        const status = this.browser.status;
+        return status >= 400 && status < 600 ? this.browser.statusText : undefined;
+      }
+    },
+    watch: {
+      browser(browser) {
+        this.update(browser);
       }
     }
   };
@@ -56,7 +61,6 @@
   .card {
     margin-left: 1em;
     margin-right: 1em;
-    height: 100%;
   }
 
   pre {
@@ -65,7 +69,5 @@
 
   iframe {
     border: none;
-    height: 100%;
-    width: 100%;
   }
 </style>
