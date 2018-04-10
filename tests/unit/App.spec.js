@@ -61,10 +61,6 @@ Given("an App", () => {
       app.setData({ url: anotherUrl });
     });
 
-    //Then("fetch the resource and put the result in body", () => {
-      //expect(app.vm.body).to.equal("some-body");
-    //});
-
     Then("the hash location should be set to the url-encoded url", () => {
       expect(window.location.hash).to.equal(expectedHashUrl);
     });
@@ -87,6 +83,25 @@ Given("an App", () => {
 
     Then("it should be url-decoded and it should update the app url", () => {
       expect(app.vm.url).to.equal(expectedUrl);
+    });
+  });
+
+  When("setting a generic error message", () => {
+    beforeEach(() => {
+      app.setMethods({
+        request: app.vm.setGenericErrorMessage
+      });
+
+      app.setData({ url: "test-url" });
+    });
+
+    Then("display an error message", () => {
+      expect(app.text()).contains("ERROR");
+    });
+
+    Then("display the code as text", () => {
+      const code = app.find("code");
+      expect(code.element.classList.contains("text")).to.be.true;
     });
   });
 });

@@ -5,7 +5,7 @@
        class="form-control"
        :value="value"
        :placeholder="placeholder"
-       @keyup.enter="onKeyup"
+       @keyup.enter="onEnter"
        aria-label="URL"
        aria-describedby="basic-addon2">
   </div>
@@ -19,7 +19,7 @@
       placeholder: String
     },
     methods: {
-      onKeyup(event) {
+      onEnter(event) {
         this.$emit("input", event.target.value);
       }
     }
