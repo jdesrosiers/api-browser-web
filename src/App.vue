@@ -16,10 +16,10 @@
 <script>
   import * as Application from "../lib/application.js";
   import * as Browser from "../lib/browser.js";
-  import Document from "./components/Document.vue";
-  import Error from "./components/Error.vue";
-  import UrlBar from "./components/UrlBar.vue";
-  import WelcomeBanner from "./components/WelcomeBanner.vue";
+  import Document from "@/components/Document.vue";
+  import Error from "@/components/Error.vue";
+  import UrlBar from "@/components/UrlBar.vue";
+  import WelcomeBanner from "@/components/WelcomeBanner.vue";
 
   export default {
     data: () => ({
