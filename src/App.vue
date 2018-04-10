@@ -11,7 +11,13 @@
     </nav>
 
     <main role="main">
-      <Code v-if="url !== ''" :language="language" :code="body"></Code>
+      <Code
+        v-if="url !== ''"
+        :language="language"
+        :code="body"
+        :wasResponseAnError="wasResponseAnError"
+        :statusText="statusText" >
+      </Code>
       <WelcomeBanner v-else />
     </main>
   </div>
@@ -33,6 +39,8 @@
       body: "",
       language: "",
       response: undefined,
+      statusText: "",
+      wasResponseAnError: false,
       noResponseErrorMessage: noResponseErrorMessage,
       invalidUrlErrorMessage: invalidUrlErrorMessage
     }),
@@ -56,8 +64,14 @@
         }
       },
       request(url) {
+        const vm = this;
+
         fetch(url, { headers: { Accept: "application/json" } })
-          .then((response) => this.response = response)
+          .then((response) => {
+            vm.handleResponse(response);
+
+            vm.response = response;
+          })
           .catch(() => this.setErrorMessage(noResponseErrorMessage));
       },
       makeARequest(url) {
@@ -66,6 +80,14 @@
       setErrorMessage(message) {
         this.body = message;
         this.language = "text";
+        this.wasResponseAnError = false;
+      },
+      handleResponse(response) {
+        const statusCode = response.status;
+
+        this.wasResponseAnError = statusCode >= 400 && statusCode < 600;
+
+        this.statusText = response.statusText;
       }
     },
     watch: {

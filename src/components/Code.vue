@@ -1,11 +1,14 @@
 <template>
   <div class="code">
-    <div class="card" v-if="language === 'html'">
-      <iframe :srcdoc="highlighted"></iframe>
+    <div class="card" :class="{ 'border-danger': wasResponseAnError }">
+      <div class="card-header" v-if="wasResponseAnError">
+        {{ statusText }}
+      </div>
+      <iframe v-if="language === 'html'" :srcdoc="highlighted"></iframe>
+      <pre class="card" v-else>
+        <code class="hljs" :class="language" v-html="highlighted"></code>
+      </pre>
     </div>
-    <pre class="card" v-else>
-      <code class="hljs" :class="language" v-html="highlighted"></code>
-    </pre>
   </div>
 </template>
 
@@ -19,7 +22,9 @@
     name: "Code",
     props: {
       code: String,
-      language: String
+      language: String,
+      wasResponseAnError: Boolean,
+      statusText: String
     },
     methods: {
       highlight(code) {

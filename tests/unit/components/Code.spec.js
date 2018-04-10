@@ -88,4 +88,53 @@ Given("a Code", () => {
       expect(subject.element.classList.contains("hljs")).to.equal(true);
     });
   });
+
+  When("an error response is returned", () => {
+    let card;
+    let cardHeader;
+
+    beforeEach(() => {
+      code.setProps({
+        language: "html",
+        wasResponseAnError: true,
+        statusCode: 404,
+        statusText: "Not Found"
+      });
+
+      card = code.find("div.card");
+      cardHeader = code.find(".card-header");
+    });
+
+    Then("the border should be red", () => {
+      expect(card.element.classList.contains("border-danger")).to.be.true;
+    });
+
+    Then("the code should have a header", () => {
+      expect(cardHeader.exists()).to.be.true;
+    });
+
+    Then("the header should display the correct status text", () => {
+      expect(cardHeader.text()).contains("Not Found");
+    });
+  });
+
+  When("a regular response is returned", () => {
+    let card;
+    let cardHeader;
+
+    beforeEach(() => {
+      code.setProps({ language: "html", wasResponseAnError: false });
+
+      card = code.find("div.card");
+      cardHeader = code.find("div.card-header");
+    });
+
+    Then("the border should be the default color", () => {
+      expect(card.element.classList.contains("border-danger")).to.be.false;
+    });
+
+    Then("the code should not have a header", () => {
+      expect(cardHeader.exists()).to.be.false;
+    });
+  });
 });
