@@ -97,7 +97,6 @@ Given("a Code", () => {
       code.setProps({
         language: "html",
         wasResponseAnError: true,
-        statusCode: 404,
         statusText: "Not Found"
       });
 
