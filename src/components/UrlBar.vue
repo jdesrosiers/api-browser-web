@@ -30,9 +30,9 @@
         this.isUrlValid = validateUri(url);
 
         if (this.isUrlValid) {
-          this.$emit("make-a-request", event.target.value);
+          this.$emit("make-a-get-request", event.target.value);
         } else {
-          this.$emit("set-invalid-url-error-message");
+          this.$emit("handle-no-response");
         }
 
         this.$emit("input", event.target.value);

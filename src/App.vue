@@ -5,12 +5,15 @@
       <UrlBar
         v-model="url"
         placeholder="http://"
-        @make-a-request="makeARequest($event)"
-        @set-invalid-url-error-message="setErrorMessage(invalidUrlErrorMessage)"
+        @make-a-get-request="makeAGetRequest($event)"
+        @handle-no-response="handleNoResponse(invalidUrlErrorMessage)"
       />
     </nav>
 
     <main role="main">
+      <button @click="makeADeleteRequest" class="btn btn-danger" v-if="allowDelete">
+        Delete
+      </button>
       <Code
         v-if="url !== ''"
         :language="language"
@@ -32,6 +35,7 @@
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
   const invalidUrlErrorMessage = "ERROR: Invalid URL entered.";
+  const DELETE_STRING = "DELETE";
 
   export default {
     data: () => ({
@@ -41,6 +45,7 @@
       response: undefined,
       statusText: "",
       wasResponseAnError: false,
+      allowDelete: false,
       noResponseErrorMessage: noResponseErrorMessage,
       invalidUrlErrorMessage: invalidUrlErrorMessage
     }),
@@ -60,34 +65,63 @@
         if (validateUri(this.url)) {
           this.request(this.url);
         } else {
-          this.setErrorMessage(invalidUrlErrorMessage);
+          this.handleNoResponse(invalidUrlErrorMessage);
         }
       },
-      request(url) {
+      request(url, method) {
         const vm = this;
 
-        fetch(url, { headers: { Accept: "application/json" } })
+        fetch(url, {
+          headers: { Accept: "application/json" },
+          method: method
+        })
           .then((response) => {
-            vm.handleResponse(response);
+            const statusCode = response.status;
+            const allowHeaderValue = response.headers.get("Allow");
+
+            if (statusCode >= 400 && statusCode < 600) {
+              vm.handleErrorResponse(response);
+            } else {
+              if (allowHeaderValue) {
+                vm.setAllowDelete(allowHeaderValue);
+              }
+
+              vm.handleSuccessfulResponse(response);
+            }
 
             vm.response = response;
           })
-          .catch(() => this.setErrorMessage(noResponseErrorMessage));
+          .catch(() => {
+            this.handleNoResponse(noResponseErrorMessage);
+          });
       },
-      makeARequest(url) {
-        this.request(url);
+      makeAGetRequest(url) {
+        this.request(url, "GET");
       },
-      setErrorMessage(message) {
+      makeADeleteRequest() {
+        this.request(this.url, "DELETE");
+      },
+      handleErrorResponse(response) {
+        this.statusText = response.statusText;
+        this.wasResponseAnError = true;
+        this.allowDelete = false;
+      },
+      handleSuccessfulResponse(response) {
+        this.statusText = response.statusText;
+        this.wasResponseAnError = false;
+
+        if (response.status == 204) {
+          this.allowDelete = false;
+        }
+      },
+      handleNoResponse(message) {
         this.body = message;
         this.language = "text";
         this.wasResponseAnError = false;
+        this.allowDelete = false;
       },
-      handleResponse(response) {
-        const statusCode = response.status;
-
-        this.wasResponseAnError = statusCode >= 400 && statusCode < 600;
-
-        this.statusText = response.statusText;
+      setAllowDelete(allowHeaderValue) {
+        this.allowDelete = allowHeaderValue.includes(DELETE_STRING);
       }
     },
     watch: {
