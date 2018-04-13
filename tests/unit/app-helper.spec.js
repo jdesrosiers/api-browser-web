@@ -37,5 +37,27 @@ Given("a function to make a request", () => {
         expect(data).to.have.property("statusText", "OK");
       });
     });
+
+    Then("it should return false for the error response boolean", () => {
+      request("/foo").then((data) => {
+        expect(data).to.have.property("wasResponseAnError", false);
+      });
+    });
+  });
+
+  When("an error response is returned", () => {
+    beforeEach(() => {
+      const errorResponse = new window.Response("", {
+        status: 404
+      });
+
+      window.fetch.returns(Promise.resolve(errorResponse));
+    });
+
+    Then("it should return true for the error response boolean", () => {
+      request("/foo").then((data) => {
+        expect(data).to.have.property("wasResponseAnError", true);
+      });
+    });
   });
 });

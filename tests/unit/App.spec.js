@@ -194,6 +194,7 @@ Given("an App", () => {
     let codeProps;
 
     beforeEach(async () => {
+      // set up my request spy
       app.setData({
         body: "some-body",
         wasResponseAnError: false,
@@ -207,6 +208,11 @@ Given("an App", () => {
       app.vm.request(successfulResponse);
 
       codeProps = app.find(Code).vm._props;
+    });
+
+    // TODO: take out the async keyword later?
+    afterEach(async () => {
+      // restore the request spy
     });
 
     Then("the response was not an error", () => {
