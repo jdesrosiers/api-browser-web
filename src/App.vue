@@ -11,21 +11,21 @@
     </nav>
 
     <main role="main">
-      <Code
+      <MainBody
         v-if="url !== ''"
         :language="language"
         :code="body"
         :statusText="statusText"
         :links="links"
         :wasResponseAnError="wasResponseAnError">
-      </Code>
+      </MainBody>
       <WelcomeBanner v-else />
     </main>
   </div>
 </template>
 
 <script>
-  import Code from "./components/Code.vue";
+  import MainBody from "./components/MainBody.vue";
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import { validateUri } from "./validator.js";
@@ -48,7 +48,7 @@
       noResponseErrorMessage: noResponseErrorMessage,
       invalidUrlErrorMessage: invalidUrlErrorMessage
     }),
-    components: { Code, UrlBar, WelcomeBanner },
+    components: { MainBody, UrlBar, WelcomeBanner },
     mounted() {
       window.addEventListener("hashchange", this.handleHashChange);
       window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -76,8 +76,6 @@
             vm.setLinks(rawLinks);
 
             vm.handleResponse(response);
-
-            console.dir(response);
 
             vm.response = response;
           })

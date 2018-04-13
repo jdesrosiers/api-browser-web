@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
 import App from "@/App.vue";
-import Code from "@/components/Code.vue";
+import MainBody from "@/components/MainBody.vue";
 import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
 import { Given, When, Then, And, wait } from "./test-utils.js";
@@ -54,8 +54,8 @@ Given("an App", () => {
       expect(app.contains(WelcomeBanner)).to.equal(true);
     });
 
-    Then("don't display the Code", () => {
-      expect(app.contains(Code)).to.equal(false);
+    Then("don't display the MainBody", () => {
+      expect(app.contains(MainBody)).to.equal(false);
     });
   });
 
@@ -64,8 +64,8 @@ Given("an App", () => {
       expect(app.contains(WelcomeBanner)).to.equal(false);
     });
 
-    Then("display the Code", () => {
-      expect(app.contains(Code)).to.equal(true);
+    Then("display the MainBody", () => {
+      expect(app.contains(MainBody)).to.equal(true);
     });
   });
 
@@ -124,7 +124,7 @@ Given("an App", () => {
       });
 
       Then("the message should be displayed as text", () => {
-        let code = app.find("Code");
+        let code = app.find("code");
 
         expect(code.element.classList.contains("text")).to.be.true;
       });
@@ -185,7 +185,7 @@ Given("an App", () => {
       });
 
       Then("the message should be displayed as text", () => {
-        let code = app.find("Code");
+        let code = app.find("code");
 
         expect(code.element.classList.contains("text")).to.be.true;
       });
@@ -220,7 +220,7 @@ Given("an App", () => {
       //app.vm.newRequest("/foo");
       //app.update(); // TODO: remove this later?
 
-      codeProps = app.find(Code).vm._props;
+      codeProps = app.find(MainBody).vm._props;
     });
 
     //afterEach(() => {
@@ -254,7 +254,7 @@ Given("an App", () => {
 
       app.vm.request(errorResponse);
 
-      codeProps = app.find(Code).vm._props;
+      codeProps = app.find(MainBody).vm._props;
     });
 
     Then("the status text is set correctly", () => {

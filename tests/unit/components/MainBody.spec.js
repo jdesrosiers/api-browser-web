@@ -1,14 +1,14 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
-import Code from "@/components/Code.vue";
+import MainBody from "@/components/MainBody.vue";
 import { Given, When, Then } from "../test-utils.js";
 
 
-Given("a Code", () => {
+Given("a MainBody", () => {
   let code;
 
   beforeEach(() => {
-    code = mount(Code, {
+    code = mount(MainBody, {
       propsData: { language: "", code: "" },
       methods: {
         highlight: (code) => "highlighted" + code
@@ -138,6 +138,7 @@ Given("a Code", () => {
     });
   });
 
+  // TODO: deal with these tests for links
   When("a link is returned", () => {
     let link;
     let span;
