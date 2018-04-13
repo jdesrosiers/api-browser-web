@@ -1,12 +1,12 @@
 import sinon from "sinon";
-import "whatwg-fetch";
 import { expect } from "chai";
 import { Given, When, Then } from "./test-utils.js";
-import { myFetch } from "@/app-helper.js";
+import { request } from "@/app-helper.js";
 
 
 Given("a window with the fetch API", () => {
   beforeEach(() => {
+    window.fetch = () => {};
     sinon.stub(window, "fetch");
   });
 
@@ -26,10 +26,13 @@ Given("a window with the fetch API", () => {
       window.fetch.returns(Promise.resolve(okResponse));
     });
 
-    Then("it should return the body as text", () => {
-      myFetch("/foobar")
-        .then((body) => {
-          expect(body).to.equal(bodyString);
+    Then("it should return the correct response", () => {
+      request("/foobar")
+        .then((response) => {
+          response.text()
+            .then((body) => {
+              expect(body).to.equal(bodyString);
+            });
         });
     });
   });

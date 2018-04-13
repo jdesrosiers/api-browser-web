@@ -1,11 +1,12 @@
-const myFetch = (url) => {
+//import "whatwg-fetch";
+
+
+const request = (url) => {
   return window.fetch(url)
     .then((response) => {
-      return response.text()
-        .then((body) => {
-          return body;
-        });
+      console.log(response);
+      return response;
     });
 };
 
-export { myFetch };
+export { request };
