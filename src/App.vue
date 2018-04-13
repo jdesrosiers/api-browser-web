@@ -1,9 +1,8 @@
 <template>
   <div id="app">
-    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-      <a class="navbar-brand" href="/">API Browser</a>
+    <NavBar title="API Browser">
       <UrlBar v-model="url" placeholder="http://" @keyup.enter="go" />
-    </nav>
+    </NavBar>
 
     <main role="main">
       <WelcomeBanner v-if="!hasHashLocation" />
@@ -18,6 +17,7 @@
   import * as Browser from "../lib/browser.js";
   import Document from "@/components/Document.vue";
   import Error from "@/components/Error.vue";
+  import NavBar from "@/components/NavBar.vue";
   import UrlBar from "@/components/UrlBar.vue";
   import WelcomeBanner from "@/components/WelcomeBanner.vue";
 
@@ -28,7 +28,7 @@
       error: undefined,
       browser: Browser.nil
     }),
-    components: { Document, Error, UrlBar, WelcomeBanner },
+    components: { Document, Error, NavBar, UrlBar, WelcomeBanner },
     mounted() {
       window.addEventListener("hashchange", this.handleHashChange);
       window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -60,5 +60,10 @@
 <style>
   body {
     padding-top: 5rem;
+  }
+
+  main {
+    padding-left: 1em;
+    padding-right: 1em;
   }
 </style>

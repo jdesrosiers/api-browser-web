@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { shallow } from "@vue/test-utils";
+import { mount } from "@vue/test-utils";
 import Document from "@/components/Document.vue";
 import Link from "@/components/Link.vue";
 import { Given, When, Then, wait } from "../test-utils.js";
@@ -10,7 +10,7 @@ Given("a Document", () => {
     let doc;
 
     beforeEach(async () => {
-      doc = shallow(Document, {
+      doc = mount(Document, {
         propsData: {
           browser: {
             headers: { "content-type": "application/json" },
@@ -35,7 +35,7 @@ Given("a Document", () => {
     let doc;
 
     beforeEach(async () => {
-      doc = shallow(Document, {
+      doc = mount(Document, {
         propsData: {
           browser: {
             status: 404,
@@ -65,12 +65,13 @@ Given("a Document", () => {
   });
 
   When("there are Link headers", () => {
-    let subject;
+    let links, link;
 
     beforeEach(async () => {
-      const doc = shallow(Document, {
+      const doc = mount(Document, {
         propsData: {
           browser: {
+            location: new URL("http://example.com"),
             status: 404,
             statusText: "Not Found",
             headers: {
@@ -83,23 +84,24 @@ Given("a Document", () => {
       });
       await wait(0);
 
-      subject = doc.findAll(Link);
+      links = doc.findAll(Link);
+      link = links.at(0);
     });
 
     Then("there should be a Link component for each link parsed", () => {
-      expect(subject.length).to.equal(2);
+      expect(links.length).to.equal(2);
     });
 
     Then("href should be parsed from each link", () => {
-      expect(subject.at(0).vm.link.href).to.equal("/foo");
+      expect(link.vm.link.href).to.equal("/foo");
     });
 
     Then("rel should be parsed from each link", () => {
-      expect(subject.at(0).vm.link.rel).to.equal("foo");
+      expect(link.vm.link.rel).to.equal("foo");
     });
 
     Then("title should be parsed from each link", () => {
-      expect(subject.at(0).vm.link.title).to.equal("Foo");
+      expect(link.vm.link.title).to.equal("Foo");
     });
   });
 });

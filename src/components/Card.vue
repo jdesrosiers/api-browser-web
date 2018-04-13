@@ -1,5 +1,5 @@
-<template functional>
-  <div class="alert alert-danger" role="alert">
+<template>
+  <div class="card">
     <slot />
   </div>
 </template>
