@@ -1,10 +1,10 @@
 import { expect } from "chai";
+import { Given, When, Then, And, wait } from "./test-utils.js";
 import { mount } from "@vue/test-utils";
 import App from "@/App.vue";
 import MainBody from "@/components/MainBody.vue";
 import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
-import { Given, When, Then, And, wait } from "./test-utils.js";
 //import { request } from "@/app-helper.js";
 //import * as appHelper from "@/app-helper.js";
 
@@ -34,7 +34,6 @@ Given("an App", () => {
     app = mount(App, {
       data: { url },
       methods: {
-        // TODO: remove this later?
         request: () => {}
       }
     });

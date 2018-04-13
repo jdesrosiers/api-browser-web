@@ -23,8 +23,8 @@
     props: {
       code: String,
       language: String,
-      wasResponseAnError: Boolean,
-      statusText: String
+      statusText: String,
+      wasResponseAnError: Boolean
     },
     methods: {
       highlight(code) {

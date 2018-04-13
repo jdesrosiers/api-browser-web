@@ -13,11 +13,11 @@
     <main role="main">
       <MainBody
         v-if="url !== ''"
-        :language="language"
         :code="body"
+        :language="language"
         :statusText="statusText"
-        :links="links"
-        :wasResponseAnError="wasResponseAnError">
+        :wasResponseAnError="wasResponseAnError"
+        :links="links">
       </MainBody>
       <WelcomeBanner v-else />
     </main>
@@ -39,11 +39,11 @@
   export default {
     data: () => ({
       url: "",
+      links: undefined,
+      response: undefined,
       body: "",
       language: "",
-      response: undefined,
       statusText: "",
-      links: undefined,
       wasResponseAnError: false,
       noResponseErrorMessage: noResponseErrorMessage,
       invalidUrlErrorMessage: invalidUrlErrorMessage
