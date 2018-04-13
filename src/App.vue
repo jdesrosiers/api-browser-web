@@ -138,6 +138,10 @@
 </script>
 
 <style>
+  .btn {
+    margin-left: 1em;
+    margin-bottom: 1em;
+  }
   body {
     padding-top: 5rem;
   }
