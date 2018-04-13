@@ -76,6 +76,8 @@
 
             vm.handleResponse(response);
 
+            console.dir(response);
+
             vm.response = response;
           })
           .catch(() => {
@@ -83,6 +85,8 @@
 
             this.setErrorMessage(noResponseErrorMessage);
           });
+
+        // TODO: need to set variables based on what is returned from fetch
       },
       makeARequest(url) {
         this.request(url);
