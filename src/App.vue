@@ -35,7 +35,7 @@
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
   const invalidUrlErrorMessage = "ERROR: Invalid URL entered.";
-  const DELETE_STRING = "DELETE";
+  const deleteMethod = "DELETE";
 
   export default {
     data: () => ({
@@ -69,8 +69,6 @@
         }
       },
       request(url, method) {
-        const vm = this;
-
         fetch(url, {
           headers: { Accept: "application/json" },
           method: method
@@ -80,16 +78,16 @@
             const allowHeaderValue = response.headers.get("Allow");
 
             if (statusCode >= 400 && statusCode < 600) {
-              vm.handleErrorResponse(response);
+              this.handleErrorResponse(response);
             } else {
               if (allowHeaderValue) {
-                vm.setAllowDelete(allowHeaderValue);
+                this.setAllowDelete(allowHeaderValue);
               }
 
-              vm.handleSuccessfulResponse(response);
+              this.handleSuccessfulResponse(response);
             }
 
-            vm.response = response;
+            this.response = response;
           })
           .catch(() => {
             this.handleNoResponse(noResponseErrorMessage);
@@ -121,7 +119,7 @@
         this.allowDelete = false;
       },
       setAllowDelete(allowHeaderValue) {
-        this.allowDelete = allowHeaderValue.includes(DELETE_STRING);
+        this.allowDelete = allowHeaderValue.includes(deleteMethod);
       }
     },
     watch: {
