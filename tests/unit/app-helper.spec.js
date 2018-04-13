@@ -16,6 +16,9 @@ Given("a window with the fetch API", () => {
 
   When("a 200 response is returned", () => {
     const bodyString = "{\"hello\":\"world\"}";
+    const expectedData = {
+      body: bodyString
+    };
 
     beforeEach(() => {
       const okResponse = new window.Response(bodyString, {
@@ -26,13 +29,10 @@ Given("a window with the fetch API", () => {
       window.fetch.returns(Promise.resolve(okResponse));
     });
 
-    Then("it should return the correct response", () => {
+    Then("it should return the body", () => {
       request("/foobar")
-        .then((response) => {
-          response.text()
-            .then((body) => {
-              expect(body).to.equal(bodyString);
-            });
+        .then((data) => {
+          expect(data).to.eql(expectedData);
         });
     });
   });

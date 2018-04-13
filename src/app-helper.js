@@ -4,8 +4,10 @@
 const request = (url) => {
   return window.fetch(url)
     .then((response) => {
-      console.log(response);
-      return response;
+      return response.text()
+        .then((body) => {
+          return { body: body };
+        });
     });
 };
 
