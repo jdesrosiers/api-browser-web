@@ -5,6 +5,7 @@ import Code from "@/components/Code.vue";
 import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
 import { Given, When, Then, And, wait } from "./test-utils.js";
+//import { request } from "@/app-helper.js";
 //import * as appHelper from "@/app-helper.js";
 
 
@@ -192,6 +193,7 @@ Given("an App", () => {
   });
 
   When("a successful response is returned", () => {
+    //let stub;
     let codeProps;
     //const data = {
     //  wasResponseAnError: false,
@@ -199,16 +201,13 @@ Given("an App", () => {
     //};
 
     beforeEach(async () => {
-      //window.fetch = () => {};
-      //sinon.stub(window, "fetch");
+      //stub = sinon.stub(appHelper, "request");
 
-      //window.fetch.returns(Promise.resolve(data));
-
-      //sinon.spy(appHelper, "request");
+      //stub.returns(data);
 
       app.setData({
         body: "some-body",
-        wasResponseAnError: false,
+        wasResponseAnError: true,
         statusText: ""
       });
 
@@ -219,13 +218,13 @@ Given("an App", () => {
       app.vm.request(successfulResponse);
 
       //app.vm.newRequest("/foo");
-      //app.update();
+      //app.update(); // TODO: remove this later?
 
       codeProps = app.find(Code).vm._props;
     });
 
     //afterEach(() => {
-    //  appHelper.request.restore();
+    //  stub.restore();
     //});
 
     Then("the response was not an error", () => {

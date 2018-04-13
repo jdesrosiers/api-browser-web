@@ -43,6 +43,12 @@ Given("a function to make a request", () => {
         expect(data).to.have.property("wasResponseAnError", false);
       });
     });
+
+    Then("it should return the language", () => {
+      request("/foo").then((data) => {
+        expect(data).to.have.property("language", "json");
+      });
+    });
   });
 
   When("an error response is returned", () => {
