@@ -93,12 +93,8 @@ Given("an App", () => {
         app.vm.request.restore();
       });
 
-      Then("a request should be made", () => {
-        expect(spy.calledOnce, "spy is not being called 1 time").to.be.true;
-      });
-
-      Then("the request should be made to the correct URL", () => {
-        expect(spy.calledWith(anotherUrl), "spy was not called with the correct URL").to.be.true;
+      Then("a GET request should be made with the correct URL", () => {
+        expect(spy.calledWith(anotherUrl, "GET"), "spy was not called with the correct arguments").to.be.true;
       });
     });
   });
@@ -193,14 +189,8 @@ Given("an App", () => {
     let codeProps;
 
     beforeEach(async () => {
-      app.setData({
-        body: "some-body",
-        wasResponseAnError: false,
-        statusText: ""
-      });
-
       app.setMethods({
-        request: app.vm.handleResponse
+        request: app.vm.handleSuccessfulResponse
       });
 
       app.vm.request(successfulResponse);
@@ -222,13 +212,11 @@ Given("an App", () => {
 
     beforeEach(async () => {
       app.setData({
-        body: "some-body",
-        wasResponseAnError: false,
-        statusText: ""
+        wasResponseAnError: true
       });
 
       app.setMethods({
-        request: app.vm.handleResponse
+        request: app.vm.handleErrorResponse
       });
 
       app.vm.request(errorResponse);
@@ -242,6 +230,10 @@ Given("an App", () => {
 
     And("then a 2XX response is returned", () => {
       beforeEach(async () => {
+        app.setMethods({
+          request: app.vm.handleSuccessfulResponse
+        });
+
         app.vm.request(successfulResponse);
       });
 
@@ -267,6 +259,96 @@ Given("an App", () => {
       Then("the message for an error response should not be displayed", () => {
         expect(app.text().includes("Not Found")).to.be.false;
       });
+    });
+  });
+
+  When("a response with Delete in the Allow header is returned", () => {
+    const allowHeaderValue = "GET,DELETE";
+
+    beforeEach(async () => {
+      app.setMethods({
+        request: app.vm.setAllowDelete
+      });
+
+      app.vm.request(allowHeaderValue);
+    });
+
+    Then("a button is displayed", () => {
+      expect(app.contains("button")).to.be.true;
+    });
+
+    And("then no response is returned", () => {
+      beforeEach(async () => {
+        app.setMethods({
+          request: app.vm.handleNoResponse
+        });
+
+        app.vm.request("");
+      });
+
+      Then("no button is displayed", () => {
+        expect(app.contains("button")).to.be.false;
+      });
+    });
+
+    And("then an error response is returned", () => {
+      beforeEach(async () => {
+        app.setMethods({
+          request: app.vm.handleErrorResponse
+        });
+
+        app.vm.request({});
+      });
+
+      Then("no button is displayed", () => {
+        expect(app.contains("button")).to.be.false;
+      });
+    });
+  });
+
+  When("the user clicks the Delete button", () => {
+    let spy;
+    let button;
+    const url = "test";
+
+    beforeEach(() => {
+      app.setData({
+        url: url,
+        allowDelete: true
+      });
+
+      spy = sinon.spy(app.vm, "request");
+
+      button = app.find("button");
+      button.trigger("click");
+    });
+
+    afterEach(() => {
+      app.vm.request.restore();
+    });
+
+    Then("a DELETE request should be made with the correct URL", () => {
+      expect(spy.calledWith(url, "DELETE"), "spy was not called with the correct arguments").to.be.true;
+    });
+  });
+
+  When("the resource was successfully deleted", () => {
+    const noContentResponse = {
+      status: 204
+    };
+
+    beforeEach(async () => {
+      app.setData({ allowDelete: true });
+
+      app.setMethods({
+        request: app.vm.handleSuccessfulResponse
+      });
+
+      app.vm.request(noContentResponse);
+    });
+
+    Then("no button is displayed", () => {
+      expect(app.contains("button")).to.be.false;
     });
   });
 });
