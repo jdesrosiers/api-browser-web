@@ -4,7 +4,7 @@ import { Given, When, Then } from "./test-utils.js";
 import { request } from "@/app-helper.js";
 
 
-Given("a window with the fetch API", () => {
+Given("a function to make a request", () => {
   beforeEach(() => {
     window.fetch = () => {};
     sinon.stub(window, "fetch");
@@ -16,9 +16,6 @@ Given("a window with the fetch API", () => {
 
   When("a 200 response is returned", () => {
     const bodyString = "{\"hello\":\"world\"}";
-    const expectedData = {
-      body: bodyString
-    };
 
     beforeEach(() => {
       const okResponse = new window.Response(bodyString, {
@@ -30,18 +27,15 @@ Given("a window with the fetch API", () => {
     });
 
     Then("it should return the body", () => {
-      request("/foobar")
-        .then((data) => {
-          expect(data).to.eql(expectedData);
-        });
+      request("/foo").then((data) => {
+        expect(data).to.have.property("body", bodyString);
+      });
+    });
+
+    Then("it should return the status text", () => {
+      request("/foo").then((data) => {
+        expect(data).to.have.property("statusText", "OK");
+      });
     });
   });
 });
-
-//return window.fetch("/foobar")
-//  .then((response) => {
-//    response.json()
-//      .then((json) => {
-//        expect(json.hello).to.equal("world");
-//      });
-//  });

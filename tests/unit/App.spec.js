@@ -32,6 +32,7 @@ Given("an App", () => {
     app = mount(App, {
       data: { url },
       methods: {
+        // TODO: remove this later?
         request: () => {}
       }
     });
