@@ -30,6 +30,7 @@
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import { validateUri } from "./validator.js";
   import { parseRawLinks, resolveUrls } from "./link-utils.js";
+  import { request } from "./app-helper.js";
 
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
@@ -85,8 +86,14 @@
 
             this.setErrorMessage(noResponseErrorMessage);
           });
-
-        // TODO: need to set variables based on what is returned from fetch
+      },
+      newRequest(url) {
+        const vm = this;
+        request(url)
+          .then((data) => {
+            vm.wasResponseAnError = data.wasResponseAnError;
+            vm.statusText = data.statusText;
+          });
       },
       makeARequest(url) {
         this.request(url);

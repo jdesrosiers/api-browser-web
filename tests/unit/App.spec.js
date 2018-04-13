@@ -5,6 +5,7 @@ import Code from "@/components/Code.vue";
 import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
 import { Given, When, Then, And, wait } from "./test-utils.js";
+//import * as appHelper from "@/app-helper.js";
 
 
 Given("an App", () => {
@@ -192,9 +193,19 @@ Given("an App", () => {
 
   When("a successful response is returned", () => {
     let codeProps;
+    //const data = {
+    //  wasResponseAnError: false,
+    //  statusText: "OK"
+    //};
 
     beforeEach(async () => {
-      // set up my request spy
+      //window.fetch = () => {};
+      //sinon.stub(window, "fetch");
+
+      //window.fetch.returns(Promise.resolve(data));
+
+      //sinon.spy(appHelper, "request");
+
       app.setData({
         body: "some-body",
         wasResponseAnError: false,
@@ -207,19 +218,23 @@ Given("an App", () => {
 
       app.vm.request(successfulResponse);
 
+      //app.vm.newRequest("/foo");
+      //app.update();
+
       codeProps = app.find(Code).vm._props;
     });
 
-    // TODO: take out the async keyword later?
-    afterEach(async () => {
-      // restore the request spy
-    });
+    //afterEach(() => {
+    //  appHelper.request.restore();
+    //});
 
     Then("the response was not an error", () => {
       expect(codeProps.wasResponseAnError).to.equal(false);
     });
 
     Then("the status text is set correctly", () => {
+      //console.log(app.vm.statusText);
+      //console.log(app.vm.wasResponseAnError);
       expect(codeProps.statusText).to.equal("OK");
     });
   });
