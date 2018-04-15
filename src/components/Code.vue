@@ -30,7 +30,8 @@
         }
       },
       language() {
-        return HttpParser.subtypeName(this.browser.headers["content-type"]);
+        const contentType = this.browser.headers["content-type"];
+        return contentType ? HttpParser.subtypeName(contentType) : "";
       },
       body() {
         return this.browser.body;

@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { mount } from "@vue/test-utils";
 import { Given, When, Then, wait } from "./test-utils.js";
 import App from "@/App.vue";
-import * as Browser from "../../lib/browser";
+import Delete from "@/components/Delete.vue";
 import Document from "@/components/Document.vue";
 import Error from "@/components/Error.vue";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
@@ -13,6 +13,10 @@ Given("an App", () => {
 
   const hashUrl = "#http%3A%2F%2Fexample.com";
   const url = "http://example.com";
+  const browser = {
+    location: new URL(url),
+    headers: { allow: "GET, DELETE" }
+  };
 
   beforeEach(async () => {
     window.location.hash = hashUrl;
@@ -20,7 +24,7 @@ Given("an App", () => {
 
     app = mount(App, {
       methods: {
-        request: () => Promise.resolve(Browser.nil)
+        request: () => Promise.resolve(browser)
       }
     });
   });
@@ -149,6 +153,25 @@ Given("an App", () => {
 
     Then("it should be url-decoded and it should update the app URL", () => {
       expect(app.vm.url).to.equal(expectedUrl);
+    });
+  });
+
+  When("a delete event is received", () => {
+    let method;
+
+    beforeEach(() => {
+      app.setMethods({
+        request: (link) => {
+          method = link.method;
+          return Promise.resolve(browser);
+        }
+      });
+
+      app.find(Delete).trigger("click");
+    });
+
+    Then("it should make a DELETE request", () => {
+      expect(method).to.equal("DELETE");
     });
   });
 });

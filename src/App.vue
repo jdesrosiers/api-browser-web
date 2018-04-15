@@ -1,13 +1,13 @@
 <template>
   <div id="app">
     <NavBar title="API Browser">
-      <UrlBar v-model="url" placeholder="http://" @keyup.enter="go" />
+      <UrlBar :value="url" placeholder="http://" @keyup.enter="go" />
     </NavBar>
 
     <main role="main">
       <WelcomeBanner v-if="!hasHashLocation" />
       <Error v-else-if="error">{{ error }}</Error>
-      <Document v-else-if="browser.location" :browser="browser" />
+      <Document v-else-if="browser.location" :browser="browser" @delete="handleRequest" />
     </main>
   </div>
 </template>
@@ -40,15 +40,22 @@
       handleHashChange() {
         this.url = Application.getLocation();
         this.hasHashLocation = !!this.url;
+        this.handleRequest({ href: this.url });
+      },
+      handleRequest(link) {
         this.browser = Browser.nil;
         this.error = undefined;
 
-        this.request()
+        const response = this.request(link);
+        this.handleResponse(response);
+      },
+      request(link) {
+        return Browser.follow(this.browser, link);
+      },
+      handleResponse(response) {
+        response
           .then((browser) => this.browser = browser)
           .catch((err) => this.error = err.toString());
-      },
-      request() {
-        return Browser.follow(this.browser, { href: this.url });
       },
       go(event) {
         Application.setLocation(event.target.value);

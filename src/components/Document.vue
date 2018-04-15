@@ -1,11 +1,16 @@
 <template>
-  <Card :class="{ 'border-danger': statusText }">
-    <CardHeader v-if="statusText" class="bg-danger">
-      {{ statusText }}
-    </CardHeader>
-    <Code :browser="browser" />
-    <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
-  </Card>
+  <div>
+    <div class="clearfix">
+      <Delete v-if="canDelete" @click="onDelete" class="float-right" />
+    </div>
+    <Card :class="{ 'border-danger': statusText }">
+      <CardHeader v-if="statusText" class="bg-danger">
+        {{ statusText }}
+      </CardHeader>
+      <Code :browser="browser" />
+      <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
+    </Card>
+  </div>
 </template>
 
 <script>
@@ -13,12 +18,19 @@
   import Card from "@/components/Card.vue";
   import CardHeader from "@/components/CardHeader.vue";
   import Code from "@/components/Code.vue";
+  import Delete from "@/components/Delete.vue";
   import Link from "@/components/Link.vue";
 
   export default {
     name: "Document",
     props: ["browser"],
-    components: { Card, CardHeader, Code, Link },
+    components: { Card, CardHeader, Code, Delete, Link },
+    methods: {
+      onDelete() {
+        const link = { href: this.browser.location.href, method: "DELETE" };
+        this.$emit("delete", link);
+      }
+    },
     computed: {
       statusText() {
         const status = this.browser.status;
@@ -27,10 +39,21 @@
       links() {
         const link = this.browser.headers["link"];
         return link ? HttpParser.parseLink(link) : [];
+      },
+      allow() {
+        const allow = this.browser.headers["allow"];
+        return allow ? HttpParser.parseAllow(allow) : [];
+      },
+      canDelete() {
+        return this.allow.includes("delete");
       }
     }
   };
 </script>
 
 <style scoped>
+  button {
+    margin-left: .5rem;
+    margin-bottom: .5rem;
+  }
 </style>
