@@ -30,7 +30,7 @@
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import { validateUri } from "./validator.js";
   import { parseRawLinks, resolveUrls } from "./link-utils.js";
-  import { request } from "./app-helper.js";
+  import { myRequest } from "./app-helper.js";
 
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
@@ -87,8 +87,9 @@
       },
       newRequest(url) {
         const vm = this;
-        request(url)
+        myRequest(url)
           .then((data) => {
+            console.log("- inside then() of myRequest");
             vm.wasResponseAnError = data.wasResponseAnError;
             vm.statusText = data.statusText;
           });

@@ -5,7 +5,6 @@ import App from "@/App.vue";
 import MainBody from "@/components/MainBody.vue";
 import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
-//import { request } from "@/app-helper.js";
 //import * as appHelper from "@/app-helper.js";
 
 
@@ -200,9 +199,9 @@ Given("an App", () => {
     //};
 
     beforeEach(async () => {
-      //stub = sinon.stub(appHelper, "request");
+      //stub = sinon.stub(appHelper, "myRequest");
 
-      //stub.returns(data);
+      //stub.resolves(data);
 
       app.setData({
         body: "some-body",
@@ -216,7 +215,7 @@ Given("an App", () => {
 
       app.vm.request(successfulResponse);
 
-      //app.vm.newRequest("/foo");
+      //app.vm.newRequest("/foo"); // <- issue starts here
       //app.update(); // TODO: remove this later?
 
       codeProps = app.find(MainBody).vm._props;

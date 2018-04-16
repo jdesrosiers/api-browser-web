@@ -2,7 +2,8 @@ import "whatwg-fetch";
 
 const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
 
-const request = (url) => {
+// TODO: change 'myRequest' back to 'request'
+const myRequest = (url) => {
   return window.fetch(url)
     .then((response) => {
       const statusCode = response.status;
@@ -18,4 +19,4 @@ const request = (url) => {
     });
 };
 
-export { request };
+export { myRequest };

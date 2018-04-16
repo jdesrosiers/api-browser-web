@@ -1,7 +1,7 @@
 import sinon from "sinon";
 import { expect } from "chai";
 import { Given, When, Then } from "./test-utils.js";
-import { request } from "@/app-helper.js";
+import { myRequest } from "@/app-helper.js";
 
 
 Given("a function to make a request", () => {
@@ -27,25 +27,25 @@ Given("a function to make a request", () => {
     });
 
     Then("it should return the body", () => {
-      request("/foo").then((data) => {
+      myRequest("/foo").then((data) => {
         expect(data).to.have.property("body", bodyString);
       });
     });
 
     Then("it should return the status text", () => {
-      request("/foo").then((data) => {
+      myRequest("/foo").then((data) => {
         expect(data).to.have.property("statusText", "OK");
       });
     });
 
     Then("it should return false for the error response boolean", () => {
-      request("/foo").then((data) => {
+      myRequest("/foo").then((data) => {
         expect(data).to.have.property("wasResponseAnError", false);
       });
     });
 
     Then("it should return the language", () => {
-      request("/foo").then((data) => {
+      myRequest("/foo").then((data) => {
         expect(data).to.have.property("language", "json");
       });
     });
@@ -61,7 +61,7 @@ Given("a function to make a request", () => {
     });
 
     Then("it should return true for the error response boolean", () => {
-      request("/foo").then((data) => {
+      myRequest("/foo").then((data) => {
         expect(data).to.have.property("wasResponseAnError", true);
       });
     });
