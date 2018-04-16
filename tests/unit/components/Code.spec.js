@@ -1,7 +1,7 @@
 import { expect } from "chai";
+import { Given, When, Then } from "../test-utils.js";
 import { mount } from "@vue/test-utils";
 import Code from "@/components/Code.vue";
-import { Given, When, Then } from "../test-utils.js";
 
 
 Given("a Code", () => {

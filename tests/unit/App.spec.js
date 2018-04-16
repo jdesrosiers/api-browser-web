@@ -1,10 +1,11 @@
 import { expect } from "chai";
+import { Given, When, Then, And, wait } from "./test-utils.js";
 import { mount } from "@vue/test-utils";
 import App from "@/App.vue";
-import Code from "@/components/Code.vue";
+import MainBody from "@/components/MainBody.vue";
 import sinon from "sinon";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
-import { Given, When, Then, And, wait } from "./test-utils.js";
+//import * as appHelper from "@/app-helper.js";
 
 
 Given("an App", () => {
@@ -51,8 +52,8 @@ Given("an App", () => {
       expect(app.contains(WelcomeBanner)).to.equal(true);
     });
 
-    Then("don't display the Code", () => {
-      expect(app.contains(Code)).to.equal(false);
+    Then("don't display the MainBody", () => {
+      expect(app.contains(MainBody)).to.equal(false);
     });
   });
 
@@ -61,8 +62,8 @@ Given("an App", () => {
       expect(app.contains(WelcomeBanner)).to.equal(false);
     });
 
-    Then("display the Code", () => {
-      expect(app.contains(Code)).to.equal(true);
+    Then("display the MainBody", () => {
+      expect(app.contains(MainBody)).to.equal(true);
     });
   });
 
@@ -121,7 +122,7 @@ Given("an App", () => {
       });
 
       Then("the message should be displayed as text", () => {
-        let code = app.find("Code");
+        let code = app.find("code");
 
         expect(code.element.classList.contains("text")).to.be.true;
       });
@@ -148,7 +149,7 @@ Given("an App", () => {
   When("the hash is changed", () => {
     let spy;
 
-    beforeEach(async () => {
+    beforeEach(() => {
       spy = sinon.spy(app.vm, "request");
     });
 
@@ -182,7 +183,7 @@ Given("an App", () => {
       });
 
       Then("the message should be displayed as text", () => {
-        let code = app.find("Code");
+        let code = app.find("code");
 
         expect(code.element.classList.contains("text")).to.be.true;
       });
@@ -190,12 +191,21 @@ Given("an App", () => {
   });
 
   When("a successful response is returned", () => {
+    //let stub;
     let codeProps;
+    //const data = {
+    //  wasResponseAnError: false,
+    //  statusText: "OK"
+    //};
 
     beforeEach(async () => {
+      //stub = sinon.stub(appHelper, "myRequest");
+
+      //stub.resolves(data);
+
       app.setData({
         body: "some-body",
-        wasResponseAnError: false,
+        wasResponseAnError: true,
         statusText: ""
       });
 
@@ -205,14 +215,23 @@ Given("an App", () => {
 
       app.vm.request(successfulResponse);
 
-      codeProps = app.find("Code").vnode.context._props;
+      //app.vm.newRequest("/foo"); // <- issue starts here
+      //app.update(); // TODO: remove this later?
+
+      codeProps = app.find(MainBody).vm._props;
     });
+
+    //afterEach(() => {
+    //  stub.restore();
+    //});
 
     Then("the response was not an error", () => {
       expect(codeProps.wasResponseAnError).to.equal(false);
     });
 
     Then("the status text is set correctly", () => {
+      //console.log(app.vm.statusText);
+      //console.log(app.vm.wasResponseAnError);
       expect(codeProps.statusText).to.equal("OK");
     });
   });
@@ -233,7 +252,7 @@ Given("an App", () => {
 
       app.vm.request(errorResponse);
 
-      codeProps = app.find("Code").vnode.context._props;
+      codeProps = app.find(MainBody).vm._props;
     });
 
     Then("the status text is set correctly", () => {
@@ -267,6 +286,60 @@ Given("an App", () => {
       Then("the message for an error response should not be displayed", () => {
         expect(app.text().includes("Not Found")).to.be.false;
       });
+    });
+  });
+
+  When("a response with link headers is returned", () => {
+    const rawLinks =
+      "</example>; rel=\"http://base.com\"; title=\"Example link\", " +
+      "</test>; rel=\"http://test.com\"; title=\"Test link\"";
+
+    beforeEach(() => {
+      app.setMethods({
+        request: app.vm.setLinks
+      });
+
+      app.vm.request(rawLinks);
+
+      app.update();
+    });
+
+    Then("one link should be displayed", () => {
+      expect(app.text().includes("Example link")).to.be.true;
+    });
+
+    Then("the second link should be displayed", () => {
+      expect(app.text().includes("Test link")).to.be.true;
+    });
+
+    Then("the link's href should be set correctly", () => {
+      expect(app.vm.links[0].href).to.equal("#http%3A%2F%2Fexample.com%2Fexample");
+    });
+
+    And("then an invalid URL is entered", () => {
+      let input;
+
+      beforeEach(() => {
+        app.setData({ url: "abc" });
+
+        input = app.find("input");
+        input.trigger("keyup.enter");
+      });
+
+      Then("no links are displayed", () => {
+        expect(app.text().includes("link")).to.be.false;
+      });
+    });
+  });
+
+  When("a response without link headers is returned", () => {
+    beforeEach(() => {
+      app.vm.request([]);
+      app.update();
+    });
+
+    Then("no links are displayed", () => {
+      expect(app.text().includes("link")).to.be.false;
     });
   });
 });

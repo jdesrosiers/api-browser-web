@@ -11,23 +11,26 @@
     </nav>
 
     <main role="main">
-      <Code
+      <MainBody
         v-if="url !== ''"
-        :language="language"
         :code="body"
+        :language="language"
+        :statusText="statusText"
         :wasResponseAnError="wasResponseAnError"
-        :statusText="statusText" >
-      </Code>
+        :links="links">
+      </MainBody>
       <WelcomeBanner v-else />
     </main>
   </div>
 </template>
 
 <script>
-  import Code from "./components/Code.vue";
+  import MainBody from "./components/MainBody.vue";
   import UrlBar from "./components/UrlBar.vue";
   import WelcomeBanner from "./components/WelcomeBanner.vue";
   import { validateUri } from "./validator.js";
+  import { parseRawLinks, resolveUrls } from "./link-utils.js";
+  import { myRequest } from "./app-helper.js";
 
   const subtypeName = (contentType) => contentType.match(/.*\/([^;]*)(;.*)?/)[1];
   const noResponseErrorMessage = "ERROR: No response was returned. Please check the browser console.";
@@ -36,15 +39,16 @@
   export default {
     data: () => ({
       url: "",
+      links: undefined,
+      response: undefined,
       body: "",
       language: "",
-      response: undefined,
       statusText: "",
       wasResponseAnError: false,
       noResponseErrorMessage: noResponseErrorMessage,
       invalidUrlErrorMessage: invalidUrlErrorMessage
     }),
-    components: { Code, UrlBar, WelcomeBanner },
+    components: { MainBody, UrlBar, WelcomeBanner },
     mounted() {
       window.addEventListener("hashchange", this.handleHashChange);
       window.dispatchEvent(new HashChangeEvent("hashchange"));
@@ -68,11 +72,27 @@
 
         fetch(url, { headers: { Accept: "application/json" } })
           .then((response) => {
+            let rawLinks = response.headers.get("Link");
+            vm.setLinks(rawLinks);
+
             vm.handleResponse(response);
 
             vm.response = response;
           })
-          .catch(() => this.setErrorMessage(noResponseErrorMessage));
+          .catch(() => {
+            vm.setLinks([]);
+
+            this.setErrorMessage(noResponseErrorMessage);
+          });
+      },
+      newRequest(url) {
+        const vm = this;
+        myRequest(url)
+          .then((data) => {
+            console.log("- inside then() of myRequest");
+            vm.wasResponseAnError = data.wasResponseAnError;
+            vm.statusText = data.statusText;
+          });
       },
       makeARequest(url) {
         this.request(url);
@@ -81,6 +101,11 @@
         this.body = message;
         this.language = "text";
         this.wasResponseAnError = false;
+        this.setLinks([]);
+      },
+      setLinks(rawLinks) {
+        const parsedLinks = parseRawLinks(rawLinks);
+        this.links = resolveUrls(parsedLinks, this.url);
       },
       handleResponse(response) {
         const statusCode = response.status;
