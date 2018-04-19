@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { shallow } from "@vue/test-utils";
-import Code from "@/components/Code.vue";
-import { Given, When, Then, wait } from "../test-utils.js";
+import { Given, When, Then, wait } from "@/../tests/unit/test-utils.js";
+import Code from "@/components/Document/components/Code.vue";
 
 
 Given("a Code", () => {

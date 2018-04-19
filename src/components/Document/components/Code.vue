@@ -4,7 +4,7 @@
 </template>
 
 <script>
-  import * as HttpParser from "../../lib/parse-http";
+  import * as HttpParser from "@/../lib/parse-http";
   import hljs from "highlight.js";
   import "highlight.js/styles/default.css";
 

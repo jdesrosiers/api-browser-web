@@ -6,8 +6,8 @@
 </template>
 
 <script>
-  import * as Application from "../../lib/application.js";
-  import * as Browser from "../../lib/browser.js";
+  import * as Application from "@/../lib/application.js";
+  import * as Browser from "@/../lib/browser.js";
 
   export default {
     name: "Link",

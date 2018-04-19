@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { shallow } from "@vue/test-utils";
-import Link from "@/components/Link.vue";
-import { Given, Then } from "../test-utils.js";
+import { Given, Then } from "@/../tests/unit/test-utils.js";
+import Link from "@/components/Document/components/Link.vue";
 
 
 Given("a Link", () => {

@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
-import { Given, When, Then, wait } from "./test-utils.js";
+import { Given, When, Then, wait } from "@/../tests/unit/test-utils.js";
 import App from "@/App.vue";
-import Delete from "@/components/Delete.vue";
-import Document from "@/components/Document.vue";
+import Delete from "@/components/Document/components/Delete.vue";
+import Document from "@/components/Document/Document.vue";
 import Error from "@/components/Error.vue";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
 

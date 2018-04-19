@@ -14,12 +14,12 @@
 </template>
 
 <script>
-  import * as HttpParser from "../../lib/parse-http";
+  import * as HttpParser from "@/../lib/parse-http";
   import Card from "@/bootstrap/Card.vue";
   import CardHeader from "@/bootstrap/CardHeader.vue";
-  import Code from "@/components/Code.vue";
-  import Delete from "@/components/Delete.vue";
-  import Link from "@/components/Link.vue";
+  import Code from "@/components/Document/components/Code.vue";
+  import Delete from "@/components/Document/components/Delete.vue";
+  import Link from "@/components/Document/components/Link.vue";
 
   export default {
     name: "Document",

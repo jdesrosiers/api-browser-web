@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
+import { Given, When, Then } from "@/../tests/unit/test-utils.js";
 import Card from "@/bootstrap/Card.vue";
 import CardHeader from "@/bootstrap/CardHeader.vue";
-import Delete from "@/components/Delete.vue";
-import Document from "@/components/Document.vue";
-import Edit from "@/components/Edit.vue";
-import Link from "@/components/Link.vue";
-import { Given, When, Then } from "../test-utils.js";
+import Document from "@/components/Document/Document.vue";
+import Delete from "@/components/Document/components/Delete.vue";
+import Edit from "@/components/Document/components/Edit.vue";
+import Link from "@/components/Document/components/Link.vue";
 
 
 Given("a Document", () => {

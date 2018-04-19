@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
-import Delete from "@/components/Delete.vue";
-import { Given, When, Then } from "../test-utils.js";
+import { Given, When, Then } from "@/../tests/unit/test-utils.js";
+import Delete from "@/components/Document/components/Delete.vue";
 
 
 Given("a Delete", () => {

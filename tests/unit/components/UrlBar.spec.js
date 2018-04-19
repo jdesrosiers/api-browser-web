@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
+import { Given, When, Then, And } from "@/../tests/unit/test-utils.js";
 import UrlBar from "@/components/UrlBar.vue";
-import { Given, When, Then, And } from "../test-utils.js";
 
 
 Given("a component with a UrlBar that binds to `url`", () => {
