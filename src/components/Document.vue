@@ -1,16 +1,16 @@
 <template>
-  <div>
-    <div class="clearfix">
-      <Delete v-if="canDelete" @click="onDelete" class="float-right" />
-    </div>
-    <Card :class="{ 'border-danger': statusText }">
-      <CardHeader v-if="statusText" class="bg-danger">
-        {{ statusText }}
-      </CardHeader>
+  <Card :class="{ 'border-danger': isError }">
+    <CardHeader v-if="title" :class="{ 'bg-danger': isError }">
+      {{ title }}
+    </CardHeader>
+    <div style="position: relative">
+      <div class="methods">
+        <Delete v-if="canDelete" @click="onDelete" />
+      </div>
       <Code :browser="browser" />
-      <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
-    </Card>
-  </div>
+    </div>
+    <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
+  </Card>
 </template>
 
 <script>
@@ -32,9 +32,11 @@
       }
     },
     computed: {
-      statusText() {
-        const status = this.browser.status;
-        return status >= 400 && status < 600 ? this.browser.statusText : undefined;
+      title() {
+        return this.isError ? this.browser.statusText : undefined;
+      },
+      isError() {
+        return this.browser.status >= 400
       },
       links() {
         const link = this.browser.headers["link"];
@@ -52,8 +54,12 @@
 </script>
 
 <style scoped>
-  button {
-    margin-left: .5rem;
-    margin-bottom: .5rem;
+  .methods {
+    position: absolute;
+    right: 0;
+    margin-top: .5em;
+  }
+  .methods * {
+    margin-right: .5em;
   }
 </style>
