@@ -36,7 +36,7 @@
         return this.isError ? this.browser.statusText : undefined;
       },
       isError() {
-        return this.browser.status >= 400
+        return this.browser.status >= 400;
       },
       links() {
         const link = this.browser.headers["link"];
