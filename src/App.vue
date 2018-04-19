@@ -24,7 +24,6 @@
   export default {
     data: () => ({
       url: "",
-      hasHashLocation: false,
       error: undefined,
       browser: Browser.nil
     }),
@@ -36,10 +35,14 @@
     beforeDestroy() {
       window.removeEventListener("hashchange", this.handleHashChange);
     },
+    computed: {
+      hasHashLocation() {
+        return !!this.url;
+      }
+    },
     methods: {
       handleHashChange() {
         this.url = Application.getLocation();
-        this.hasHashLocation = !!this.url;
         this.handleRequest({ href: this.url });
       },
       handleRequest(link) {
