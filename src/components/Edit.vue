@@ -1,13 +1,10 @@
 <template>
-  <Button class="btn-danger" @click="click">Delete</Button>
+  <Button class="btn-secondary" @click="click">Edit</Button>
 </template>
 
 <script>
-  import Button from "@/bootstrap/Button.vue";
-
   export default {
-    name: "Delete",
-    components: { Button },
+    name: "Edit",
     methods: {
       click(event) {
         this.$emit("click", event);

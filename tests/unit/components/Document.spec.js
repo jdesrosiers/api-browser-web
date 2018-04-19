@@ -1,9 +1,10 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
-import Card from "@/components/Card.vue";
-import CardHeader from "@/components/CardHeader.vue";
+import Card from "@/bootstrap/Card.vue";
+import CardHeader from "@/bootstrap/CardHeader.vue";
 import Delete from "@/components/Delete.vue";
 import Document from "@/components/Document.vue";
+import Edit from "@/components/Edit.vue";
 import Link from "@/components/Link.vue";
 import { Given, When, Then } from "../test-utils.js";
 
@@ -166,6 +167,25 @@ Given("a Document", () => {
       ];
 
       expect(doc.emitted().delete).to.eql(expected);
+    });
+  });
+
+  When("the response has an Allow header with PUT", () => {
+    let doc;
+
+    beforeEach(() => {
+      doc = mount(Document, {
+        propsData: {
+          browser: {
+            location: new URL("http://example.com"),
+            headers: { allow: "GET, PUT" }
+          }
+        }
+      });
+    });
+
+    Then("the Edit button should be displayed", () => {
+      expect(doc.contains(Edit)).to.equal(true);
     });
   });
 });

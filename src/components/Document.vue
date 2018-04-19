@@ -15,8 +15,8 @@
 
 <script>
   import * as HttpParser from "../../lib/parse-http";
-  import Card from "@/components/Card.vue";
-  import CardHeader from "@/components/CardHeader.vue";
+  import Card from "@/bootstrap/Card.vue";
+  import CardHeader from "@/bootstrap/CardHeader.vue";
   import Code from "@/components/Code.vue";
   import Delete from "@/components/Delete.vue";
   import Link from "@/components/Link.vue";

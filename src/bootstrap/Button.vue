@@ -1,13 +1,12 @@
 <template>
-  <Button class="btn-danger" @click="click">Delete</Button>
+  <button type="button" class="btn" @click="click">
+    <slot />
+  </button>
 </template>
 
 <script>
-  import Button from "@/bootstrap/Button.vue";
-
   export default {
-    name: "Delete",
-    components: { Button },
+    name: "Button",
     methods: {
       click(event) {
         this.$emit("click", event);
