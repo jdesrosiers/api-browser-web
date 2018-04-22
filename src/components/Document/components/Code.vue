@@ -9,6 +9,10 @@
   import "highlight.js/styles/default.css";
 
   const formatJson = (json) => JSON.stringify(JSON.parse(json), null, "  ");
+  const parseLanguage = (subtypeName) => {
+    const matches = subtypeName.match(/(?:.*\+)?(.*)/);
+    return matches ? matches[1] : "";
+  };
 
   export default {
     name: "Code",
@@ -30,8 +34,9 @@
         }
       },
       language() {
-        const contentType = this.browser.headers["content-type"];
-        return contentType ? HttpParser.subtypeName(contentType) : "";
+        const contentType = this.browser.headers["content-type"] || "";
+        const subtypeName = HttpParser.subtypeName(contentType);
+        return parseLanguage(subtypeName);
       },
       body() {
         return this.browser.body;
@@ -47,5 +52,6 @@
 
   iframe {
     border: none;
+    border-radius: 3px;
   }
 </style>

@@ -7,7 +7,7 @@
     <main role="main">
       <WelcomeBanner v-if="!hasHashLocation" />
       <Error v-else-if="error">{{ error }}</Error>
-      <Document v-else-if="browser.location" :browser="browser" @delete="handleRequest" />
+      <Document v-else-if="browser.location" :browser="browser" @follow="handleRequest" />
     </main>
   </div>
 </template>

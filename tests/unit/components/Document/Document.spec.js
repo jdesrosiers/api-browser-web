@@ -1,12 +1,16 @@
 import { expect } from "chai";
 import { mount } from "@vue/test-utils";
-import { Given, When, Then } from "@/../tests/unit/test-utils.js";
+import { Given, When, Then, And } from "@/../tests/unit/test-utils.js";
+import Cancel from "@/components/Document/components/Cancel.vue";
 import Card from "@/bootstrap/Card.vue";
 import CardHeader from "@/bootstrap/CardHeader.vue";
 import Document from "@/components/Document/Document.vue";
 import Delete from "@/components/Document/components/Delete.vue";
 import Edit from "@/components/Document/components/Edit.vue";
+import Editor from "@/components/Document/components/Editor.vue";
 import Link from "@/components/Document/components/Link.vue";
+import Save from "@/components/Document/components/Save.vue";
+import Vue from "vue";
 
 
 Given("a Document", () => {
@@ -114,7 +118,7 @@ Given("a Document", () => {
       });
     });
 
-    Then("the Delete button should not be displayed", () => {
+    Then("it should not display the Delete button", () => {
       expect(doc.contains(Delete)).to.equal(false);
     });
   });
@@ -132,7 +136,7 @@ Given("a Document", () => {
       });
     });
 
-    Then("the Delete button should not be displayed", () => {
+    Then("it should not display the Delete button", () => {
       expect(doc.contains(Delete)).to.equal(false);
     });
   });
@@ -151,22 +155,27 @@ Given("a Document", () => {
       });
     });
 
-    Then("the Delete button should be displayed", () => {
+    Then("it should display the Delete button", () => {
       expect(doc.contains(Delete)).to.equal(true);
     });
 
-    Then("clicking the Delete button emits a delete event with a link", () => {
-      doc.find(Delete).trigger("click");
-      const expected = [
-        [
-          {
-            href: "http://example.com/",
-            method: "DELETE"
-          }
-        ]
-      ];
+    And("the Delete button is clicked", () => {
+      beforeEach(() => {
+        doc.find(Delete).trigger("click");
+      });
 
-      expect(doc.emitted().delete).to.eql(expected);
+      Then("it should emit a follow event with a delete link", () => {
+        const expected = [
+          [
+            {
+              href: "http://example.com/",
+              method: "DELETE"
+            }
+          ]
+        ];
+
+        expect(doc.emitted().follow).to.eql(expected);
+      });
     });
   });
 
@@ -184,8 +193,72 @@ Given("a Document", () => {
       });
     });
 
-    Then("the Edit button should be displayed", () => {
+    Then("it should display the Edit button", () => {
       expect(doc.contains(Edit)).to.equal(true);
+    });
+
+    And("the Edit button is clicked", () => {
+      beforeEach(async () => {
+        doc.find(Edit).trigger("click");
+        await Vue.nextTick();
+      });
+
+      Then("it should show Editor", () => {
+        expect(doc.contains(Editor)).to.equal(true);
+      });
+
+      Then("it should show Save", () => {
+        expect(doc.contains(Save)).to.equal(true);
+      });
+
+      Then("it should show Cancel", () => {
+        expect(doc.contains(Cancel)).to.equal(true);
+      });
+
+      And("the Cancel button is clicked", () => {
+        beforeEach(async () => {
+          doc.find(Cancel).trigger("click");
+          await Vue.nextTick();
+        });
+
+        Then("it should not show Editor", () => {
+          expect(doc.contains(Editor)).to.equal(false);
+        });
+
+        Then("it should not show Save", () => {
+          expect(doc.contains(Save)).to.equal(false);
+        });
+
+        Then("it should not show Cancel", () => {
+          expect(doc.contains(Cancel)).to.equal(false);
+        });
+      });
+
+      And("the editor changes", () => {
+        const expectedBody = "foo";
+        beforeEach(() => {
+          doc.find(Editor).vm.$emit("input", expectedBody);
+        });
+
+        And("the Save button is clicked", () => {
+          beforeEach(() => {
+            doc.find(Save).trigger("click");
+          });
+
+          Then("it should emit a follow event with a put link", () => {
+            const expected = [
+              [
+                {
+                  href: "http://example.com/",
+                  method: "PUT",
+                  body: expectedBody
+                }
+              ]
+            ];
+            expect(doc.emitted().follow).to.eql(expected);
+          });
+        });
+      });
     });
   });
 });
