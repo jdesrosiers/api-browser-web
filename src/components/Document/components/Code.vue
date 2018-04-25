@@ -48,6 +48,11 @@
 <style scoped>
   pre {
     margin: 0;
+    height: 100%;
+  }
+
+  code {
+    height: 100%;
   }
 
   iframe {

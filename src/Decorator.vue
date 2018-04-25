@@ -5,7 +5,12 @@
       this.$slots.decoration.forEach((decoration) => {
         decoration.data.staticClass += " decoration";
       });
-      return createElement("div", [this.$slots.decoration, this.$slots.default]);
+
+      return createElement(
+        "div",
+        { "class": "decorator" },
+        [this.$slots.decoration, this.$slots.default]
+      );
     }
   };
 </script>

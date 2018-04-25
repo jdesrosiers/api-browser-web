@@ -21,11 +21,12 @@
 <style scoped>
   textarea {
     width: 100%;
-    display: block;
+    height: 100%;
     margin: 0;
     border: 0;
     border-radius: 3px;
     padding: .5em;
     outline: none;
+    resize: none;
   }
 </style>

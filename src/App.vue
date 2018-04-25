@@ -68,12 +68,24 @@
 </script>
 
 <style>
+  html {
+    height: 100%;
+  }
+
   body {
     padding-top: 5rem;
+    height: 100%;
+  }
+
+  #app {
+    min-height: 100%;
+    display: flex;
   }
 
   main {
+    width: 100%;
     padding-left: 1em;
     padding-right: 1em;
+    padding-bottom: 1em;
   }
 </style>

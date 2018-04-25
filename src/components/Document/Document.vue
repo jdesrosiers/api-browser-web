@@ -92,6 +92,10 @@
 </script>
 
 <style scoped>
+  .card {
+    height: 100%;
+  }
+
   .buttons {
     margin-top: 1em;
     margin-right: 1em;
@@ -100,5 +104,9 @@
 
   .buttons * {
     margin-right: .5em;
+  }
+
+  .decorator {
+    height: 100%;
   }
 </style>
