@@ -53,6 +53,7 @@
     methods: {
       onEdit() {
         this.editMode = true;
+        this.body = this.browser.body;
       },
       onCancel() {
         this.editMode = false;
