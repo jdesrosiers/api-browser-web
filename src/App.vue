@@ -77,8 +77,14 @@
     height: 100%;
   }
 
+  .full-height {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
   #app {
-    min-height: 100%;
+    height: 100%;
     display: flex;
   }
 

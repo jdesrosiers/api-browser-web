@@ -1,13 +1,14 @@
 <template>
-  <div class="editor">
+  <div class="full-height">
     <div class="buttons">
-      <Button class="badge" @click="formatJson">Format</Button>
+      <Button ref="format" class="badge" @click="formatJson">Format</Button>
     </div>
-    <textarea v-model="value" @input="input" />
+    <textarea v-model="value" @input="input" class="full-height" />
   </div>
 </template>
 
 <script>
+  import * as Application from "@/../lib/application";
   import Button from "@/bootstrap/Button.vue";
 
   export default {
@@ -23,22 +24,14 @@
         this.$emit("input", event.target.value);
       },
       formatJson() {
-        this.value = JSON.stringify(JSON.parse(this.value), null, "  ");
+        this.value = Application.formatJson(this.value);
       }
     }
   };
 </script>
 
 <style scoped>
-  .editor {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
   textarea {
-    width: 100%;
-    height: 100%;
     margin: 0;
     border: 0;
     border-radius: 3px;

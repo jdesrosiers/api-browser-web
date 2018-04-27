@@ -187,7 +187,10 @@ Given("a Document", () => {
         propsData: {
           browser: {
             location: new URL("http://example.com"),
-            headers: { allow: "GET, PUT" }
+            headers: {
+              allow: "GET, PUT",
+              "content-type": "application/json"
+            }
           }
         }
       });
@@ -251,7 +254,8 @@ Given("a Document", () => {
                 {
                   href: "http://example.com/",
                   method: "PUT",
-                  body: expectedBody
+                  body: expectedBody,
+                  headers: { "Content-Type": "application/json" }
                 }
               ]
             ];

@@ -10,9 +10,7 @@ Given("a Code", () => {
     let subject;
 
     const rawJson = `{ "foo": "bar" }`;
-    const formattedJson = `highlighted{
-  "foo": "bar"
-}`;
+    const formattedJson = `highlighted{\n  "foo": "bar"\n}`;
 
     beforeEach(async () => {
       doc = shallow(Code, {

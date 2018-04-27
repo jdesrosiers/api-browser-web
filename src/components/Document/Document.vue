@@ -1,29 +1,33 @@
 <template>
-  <Card :class="{ 'border-danger': isError }">
+  <Card class="full-height" :class="{ 'border-danger': isError }">
     <CardHeader v-if="title" :class="{ 'bg-danger': isError }">
       {{ title }}
     </CardHeader>
-    <Decorator v-if="editMode">
-      <div slot="decoration" class="buttons">
-        <Save @click="onSave" />
-        <Cancel @click="onCancel" />
-      </div>
-      <Editor :browser="browser" @input="body = $event" />
-    </Decorator>
-    <Decorator v-else>
-      <div slot="decoration" class="buttons">
-        <Edit v-if="canEdit" @click="onEdit" />
-        <Delete v-if="canDelete" @click="onDelete" />
-      </div>
-      <Code :browser="browser" />
-    </Decorator>
-    <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
+    <CardBody class="full-height">
+      <Decorator v-if="editMode" class="full-height">
+        <div slot="decoration" class="buttons">
+          <Save @click="onSave" :disabled="!isValid" />
+          <Cancel @click="onCancel" />
+        </div>
+        <Editor :browser="browser" @input="body = $event" />
+        <Validation :isValid="isValid" :validationErrors="validationErrors" />
+      </Decorator>
+      <Decorator v-else class="full-height">
+        <div slot="decoration" class="buttons">
+          <Edit v-if="canEdit" @click="onEdit" />
+          <Delete v-if="canDelete" @click="onDelete" />
+        </div>
+        <Code :browser="browser" />
+      </Decorator>
+      <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
+    </CardBody>
   </Card>
 </template>
 
 <script>
-  import * as HttpParser from "@/../lib/parse-http";
+  import * as Browser from "@/../lib/browser.js";
   import Card from "@/bootstrap/Card.vue";
+  import CardBody from "@/bootstrap/CardBody.vue";
   import CardHeader from "@/bootstrap/CardHeader.vue";
   import Cancel from "@/components/Document/components/Cancel.vue";
   import Code from "@/components/Document/components/Code.vue";
@@ -33,13 +37,15 @@
   import Editor from "@/components/Document/components/Editor.vue";
   import Link from "@/components/Document/components/Link.vue";
   import Save from "@/components/Document/components/Save.vue";
+  import Validation from "@/components/Document/components/Validation.vue";
 
   export default {
     name: "Document",
     props: ["browser"],
-    data: () => ({ editMode: false, body: "" }),
+    data: () => ({ editMode: false, body: "", isValid: true, validationErrors: "" }),
     components: {
       Card,
+      CardBody,
       CardHeader,
       Cancel,
       Code,
@@ -48,7 +54,8 @@
       Edit,
       Editor,
       Link,
-      Save
+      Save,
+      Validation
     },
     methods: {
       onEdit() {
@@ -59,12 +66,18 @@
         this.editMode = false;
       },
       onDelete() {
-        const link = { href: this.browser.location.href, method: "DELETE" };
-        this.$emit("follow", link);
+        this.$emit("follow", {
+          method: "DELETE",
+          href: this.browser.location.href
+        });
       },
       onSave() {
-        const link = { href: this.browser.location.href, method: "PUT", body: this.body };
-        this.$emit("follow", link);
+        this.$emit("follow", {
+          method: "PUT",
+          href: this.browser.location.href,
+          headers: { "Content-Type": this.browser.headers["content-type"] },
+          body: this.body
+        });
       }
     },
     computed: {
@@ -72,29 +85,34 @@
         return this.isError ? this.browser.statusText : undefined;
       },
       isError() {
-        return this.browser.status >= 400;
+        return Browser.isError(this.browser);
       },
       links() {
-        const link = this.browser.headers["link"];
-        return link ? HttpParser.parseLink(link) : [];
-      },
-      allow() {
-        const allow = this.browser.headers["allow"];
-        return allow ? HttpParser.parseAllow(allow) : [];
+        return Browser.links(this.browser);
       },
       canDelete() {
-        return this.allow.includes("delete");
+        return Browser.canDelete(this.browser);
       },
       canEdit() {
-        return this.allow.includes("put");
+        return Browser.canEdit(this.browser);
+      }
+    },
+    watch: {
+      body(body) {
+        Browser.isValid(this.browser, body)
+          .then((result) => [this.isValid, this.validationErrors] = result)
+          .catch((error) => {
+            this.isValid = false;
+            this.validationErrors = error.message;
+          });
       }
     }
   };
 </script>
 
 <style scoped>
-  .card {
-    height: 100%;
+  .card-body {
+    padding: 0;
   }
 
   .buttons {
@@ -105,9 +123,5 @@
 
   .buttons * {
     margin-right: .5em;
-  }
-
-  .decorator {
-    height: 100%;
   }
 </style>

@@ -4,11 +4,11 @@
 </template>
 
 <script>
+  import * as Application from "@/../lib/application";
   import * as HttpParser from "@/../lib/parse-http";
   import hljs from "highlight.js";
   import "highlight.js/styles/default.css";
 
-  const formatJson = (json) => JSON.stringify(JSON.parse(json), null, "  ");
   const parseLanguage = (subtypeName) => {
     const matches = subtypeName.match(/(?:.*\+)?(.*)/);
     return matches ? matches[1] : "";
@@ -27,7 +27,7 @@
         if (!this.body || this.language === "html") {
           return this.body;
         } else if (this.language === "json") {
-          const formatted = formatJson(this.body);
+          const formatted = Application.formatJson(this.body);
           return this.highlight(formatted);
         } else {
           return this.highlight(this.body);
