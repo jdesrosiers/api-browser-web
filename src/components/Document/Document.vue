@@ -9,7 +9,7 @@
           <Save @click="onSave" :disabled="!isValid" />
           <Cancel @click="onCancel" />
         </div>
-        <Editor :browser="browser" @input="body = $event" />
+        <Editor @input="body = $event" />
         <Validation :isValid="isValid" :validationErrors="validationErrors" />
       </Decorator>
       <Decorator v-else class="full-height">
@@ -17,15 +17,14 @@
           <Edit v-if="canEdit" @click="onEdit" />
           <Delete v-if="canDelete" @click="onDelete" />
         </div>
-        <Code :browser="browser" />
+        <Code />
       </Decorator>
-      <Link v-for="(link, index) in links" :key="index" :browser="browser" :link="link" />
+      <Link v-for="(link, index) in links" :key="index" :link="link" />
     </CardBody>
   </Card>
 </template>
 
 <script>
-  import * as Browser from "@/../lib/browser.js";
   import Card from "@/bootstrap/Card.vue";
   import CardBody from "@/bootstrap/CardBody.vue";
   import CardHeader from "@/bootstrap/CardHeader.vue";
@@ -41,7 +40,6 @@
 
   export default {
     name: "Document",
-    props: ["browser"],
     data: () => ({ editMode: false, body: "", isValid: true, validationErrors: "" }),
     components: {
       Card,
@@ -60,46 +58,37 @@
     methods: {
       onEdit() {
         this.editMode = true;
-        this.body = this.browser.body;
       },
       onCancel() {
         this.editMode = false;
       },
       onDelete() {
-        this.$emit("follow", {
-          method: "DELETE",
-          href: this.browser.location.href
-        });
+        this.$store.dispatch("delete");
       },
       onSave() {
-        this.$emit("follow", {
-          method: "PUT",
-          href: this.browser.location.href,
-          headers: { "Content-Type": this.browser.headers["content-type"] },
-          body: this.body
-        });
+        this.$store.dispatch("save", this.body);
       }
     },
     computed: {
       title() {
-        return this.isError ? this.browser.statusText : undefined;
+        return this.isError ? this.$store.getters.statusText : undefined;
       },
       isError() {
-        return Browser.isError(this.browser);
+        return this.$store.getters.isError;
       },
       links() {
-        return Browser.links(this.browser);
+        return this.$store.getters.links;
       },
       canDelete() {
-        return Browser.canDelete(this.browser);
+        return this.$store.getters.canDelete;
       },
       canEdit() {
-        return Browser.canEdit(this.browser);
+        return this.$store.getters.canEdit;
       }
     },
     watch: {
       body(body) {
-        Browser.isValid(this.browser, body)
+        this.$store.getters.isValid(body)
           .then((result) => [this.isValid, this.validationErrors] = result)
           .catch((error) => {
             this.isValid = false;

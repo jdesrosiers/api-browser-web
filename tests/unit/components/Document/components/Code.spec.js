@@ -1,31 +1,36 @@
 import { expect } from "chai";
-import { shallow } from "@vue/test-utils";
-import { Given, When, Then, wait } from "@/../tests/unit/test-utils.js";
+import { shallow, createLocalVue } from "@vue/test-utils";
+import { Given, When, Then } from "@/../tests/unit/test-utils";
+import { browserFixture } from "@/../tests/unit/fixtures";
 import Code from "@/components/Document/components/Code.vue";
+import store from "@/store";
+import Vuex from "vuex";
 
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 Given("a Code", () => {
   When("JSON is given", () => {
-    let doc;
     let subject;
 
-    const rawJson = `{ "foo": "bar" }`;
     const formattedJson = `highlighted{\n  "foo": "bar"\n}`;
 
-    beforeEach(async () => {
-      doc = shallow(Code, {
-        propsData: {
-          browser: {
-            headers: { "content-type": "application/json" },
-            body: rawJson
-          }
-        },
+    before(async () => {
+      const Browser = browserFixture({
+        data: () => ({ "foo": "bar" }),
+        rootFormat: () => "json"
+      });
+
+      const code = shallow(Code, {
         methods: {
           highlight: (code) => "highlighted" + code
-        }
+        },
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
-      await wait(0);
-      subject = doc.find("pre > code");
+
+      subject = code.find("pre > code");
     });
 
     Then("the code should be displayed in a pre > code element", () => {
@@ -46,22 +51,22 @@ Given("a Code", () => {
   });
 
   When("HTML is given", () => {
-    let doc;
     let subject;
 
     const html = `<p>some html</p>`;
 
-    beforeEach(async () => {
-      doc = shallow(Code, {
-        propsData: {
-          browser: {
-            headers: { "content-type": "text/html; charset=utf8" },
-            body: html
-          }
-        }
+    before(async () => {
+      const Browser = browserFixture({
+        data: () => html,
+        rootFormat: () => "html"
       });
-      await wait(0);
-      subject = doc.find("iframe");
+
+      const code = shallow(Code, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
+
+      subject = code.find("iframe");
     });
 
     Then("the code should be displayed in an iframe", () => {
@@ -74,23 +79,22 @@ Given("a Code", () => {
   });
 
   When("a language other than html is given", () => {
-    let doc;
     let subject;
 
     const language = "not-a-language";
-    const code = "some random code";
 
-    beforeEach(async () => {
-      doc = shallow(Code, {
-        propsData: {
-          browser: {
-            headers: { "content-type": `application/${language}` },
-            body: code
-          }
-        }
+    before(async () => {
+      const Browser = browserFixture({
+        data: () => "some random code",
+        rootFormat: () => language
       });
-      await wait(0);
-      subject = doc.find("pre > code");
+
+      const code = shallow(Code, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
+
+      subject = code.find("pre > code");
     });
 
     Then("the code should be displayed in a pre > code element", () => {

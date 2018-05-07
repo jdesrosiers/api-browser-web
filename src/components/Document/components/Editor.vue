@@ -14,17 +14,17 @@
   export default {
     name: "Editor",
     components: { Button },
-    props: ["browser"],
     data: () => ({ value: "" }),
     mounted() {
-      this.value = this.browser.body;
+      this.value = Application.formatJson(this.$store.getters.data);
+      this.$emit("input", this.value);
     },
     methods: {
       input(event) {
         this.$emit("input", event.target.value);
       },
       formatJson() {
-        this.value = Application.formatJson(this.value);
+        this.value = Application.formatJson(JSON.parse(this.value));
       }
     }
   };

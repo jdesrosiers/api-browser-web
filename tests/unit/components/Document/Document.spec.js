@@ -1,6 +1,7 @@
 import { expect } from "chai";
-import { mount } from "@vue/test-utils";
-import { Given, When, Then, And } from "@/../tests/unit/test-utils.js";
+import { mount, createLocalVue } from "@vue/test-utils";
+import { Given, When, Then, And } from "@/../tests/unit/test-utils";
+import { browserFixture } from "@/../tests/unit/fixtures";
 import Cancel from "@/components/Document/components/Cancel.vue";
 import Card from "@/bootstrap/Card.vue";
 import CardHeader from "@/bootstrap/CardHeader.vue";
@@ -10,21 +11,25 @@ import Edit from "@/components/Document/components/Edit.vue";
 import Editor from "@/components/Document/components/Editor.vue";
 import Link from "@/components/Document/components/Link.vue";
 import Save from "@/components/Document/components/Save.vue";
-import Vue from "vue";
+import store from "@/store";
+import Vuex from "vuex";
 
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 Given("a Document", () => {
   When("the response is successful", () => {
     let doc;
 
-    beforeEach(() => {
+    before(() => {
+      const Browser = browserFixture({
+        isError: () => false
+      });
+
       doc = mount(Document, {
-        propsData: {
-          browser: {
-            status: 200,
-            headers: {}
-          }
-        }
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
     });
 
@@ -41,15 +46,15 @@ Given("a Document", () => {
   When("the response is an error", () => {
     let doc;
 
-    beforeEach(() => {
+    before(() => {
+      const Browser = browserFixture({
+        isError: () => true,
+        statusText: () => "Not Found"
+      });
+
       doc = mount(Document, {
-        propsData: {
-          browser: {
-            status: 404,
-            statusText: "Not Found",
-            headers: {}
-          }
-        }
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
     });
 
@@ -72,16 +77,17 @@ Given("a Document", () => {
   When("the response has Link headers", () => {
     let links, link;
 
-    beforeEach(() => {
+    before(() => {
+      const Browser = browserFixture({
+        links: () => [
+          { href: "/foo", rel: "foo", title: "Foo" },
+          { href: "/bar", rel: "bar", title: "Bar" }
+        ]
+      });
+
       const doc = mount(Document, {
-        propsData: {
-          browser: {
-            location: new URL("http://example.com"),
-            headers: {
-              link: `</foo>; rel="foo"; title="Foo", </bar>; rel="bar"; title="Bar"`
-            }
-          }
-        }
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
 
       links = doc.findAll(Link);
@@ -105,16 +111,17 @@ Given("a Document", () => {
     });
   });
 
-  When("the response does not have an Allow header", () => {
+  When("the resource can not be deleted", () => {
     let doc;
 
-    beforeEach(() => {
+    before(() => {
+      const Browser = browserFixture({
+        canDelete: () => false
+      });
+
       doc = mount(Document, {
-        propsData: {
-          browser: {
-            headers: {}
-          }
-        }
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
     });
 
@@ -123,35 +130,21 @@ Given("a Document", () => {
     });
   });
 
-  When("the response has an Allow header that does not contian DELETE", () => {
-    let doc;
+  When("the resouce can be deleted", () => {
+    let doc, link;
 
-    beforeEach(() => {
-      doc = mount(Document, {
-        propsData: {
-          browser: {
-            headers: { allow: "GET, PUT" }
-          }
+    before(() => {
+      const Browser = browserFixture({
+        canDelete: () => true,
+        follow: (b, l) => {
+          link = l;
+          return Promise.resolve(browserFixture());
         }
       });
-    });
 
-    Then("it should not display the Delete button", () => {
-      expect(doc.contains(Delete)).to.equal(false);
-    });
-  });
-
-  When("the response has an Allow header with DELETE", () => {
-    let doc;
-
-    beforeEach(() => {
       doc = mount(Document, {
-        propsData: {
-          browser: {
-            location: new URL("http://example.com"),
-            headers: { allow: "GET, DELETE" }
-          }
-        }
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
     });
 
@@ -164,35 +157,29 @@ Given("a Document", () => {
         doc.find(Delete).trigger("click");
       });
 
-      Then("it should emit a follow event with a delete link", () => {
-        const expected = [
-          [
-            {
-              href: "http://example.com/",
-              method: "DELETE"
-            }
-          ]
-        ];
-
-        expect(doc.emitted().follow).to.eql(expected);
+      Then("it should delete the resource", () => {
+        expect(link).to.eql({
+          method: "DELETE"
+        });
       });
     });
   });
 
   When("the response has an Allow header with PUT", () => {
-    let doc;
+    let doc, link;
 
     beforeEach(() => {
-      doc = mount(Document, {
-        propsData: {
-          browser: {
-            location: new URL("http://example.com"),
-            headers: {
-              allow: "GET, PUT",
-              "content-type": "application/json"
-            }
-          }
+      const Browser = browserFixture({
+        canEdit: () => true,
+        follow: (b, l) => {
+          link = l;
+          return Promise.resolve(browserFixture());
         }
+      });
+
+      doc = mount(Document, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
       });
     });
 
@@ -201,9 +188,8 @@ Given("a Document", () => {
     });
 
     And("the Edit button is clicked", () => {
-      beforeEach(async () => {
+      beforeEach(() => {
         doc.find(Edit).trigger("click");
-        await Vue.nextTick();
       });
 
       Then("it should show Editor", () => {
@@ -219,9 +205,8 @@ Given("a Document", () => {
       });
 
       And("the Cancel button is clicked", () => {
-        beforeEach(async () => {
+        beforeEach(() => {
           doc.find(Cancel).trigger("click");
-          await Vue.nextTick();
         });
 
         Then("it should not show Editor", () => {
@@ -248,18 +233,12 @@ Given("a Document", () => {
             doc.find(Save).trigger("click");
           });
 
-          Then("it should emit a follow event with a put link", () => {
-            const expected = [
-              [
-                {
-                  href: "http://example.com/",
-                  method: "PUT",
-                  body: expectedBody,
-                  headers: { "Content-Type": "application/json" }
-                }
-              ]
-            ];
-            expect(doc.emitted().follow).to.eql(expected);
+          Then("it should save the resources", () => {
+            expect(link).to.eql({
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: "foo"
+            });
           });
         });
       });

@@ -1,20 +1,29 @@
 import { expect } from "chai";
-import { shallow } from "@vue/test-utils";
-import { Given, Then } from "@/../tests/unit/test-utils.js";
+import { shallow, createLocalVue } from "@vue/test-utils";
+import { Given, Then } from "@/../tests/unit/test-utils";
+import { browserFixture } from "@/../tests/unit/fixtures";
 import Link from "@/components/Document/components/Link.vue";
+import store from "@/store";
+import Vuex from "vuex";
 
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 Given("a Link", () => {
   let link, rel;
 
-  beforeEach(() => {
+  before(async () => {
+    const Browser = browserFixture({
+      resolveUrl: () => "resolved-url"
+    });
+
     const component = shallow(Link, {
       propsData: {
-        browser: {
-          location: new URL("http://example.com")
-        },
         link: { rel: "foo", href: "/foo", title: "Foo" }
-      }
+      },
+      store: new Vuex.Store(store(Browser)),
+      localVue
     });
 
     link = component.find({ ref: "link" });
@@ -22,7 +31,7 @@ Given("a Link", () => {
   });
 
   Then("the href should be transformed into an application link", () => {
-    expect(link.element.href).to.equal("about:blank#http%3A%2F%2Fexample.com%2Ffoo");
+    expect(link.element.href).to.equal("about:blank#resolved-url");
   });
 
   Then("the tile should be used as link text", () => {

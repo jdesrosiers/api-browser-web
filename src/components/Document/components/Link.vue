@@ -7,14 +7,16 @@
 
 <script>
   import * as Application from "@/../lib/application.js";
-  import * as Browser from "@/../lib/browser.js";
 
   export default {
     name: "Link",
-    props: ["browser", "link"],
+    props: ["link"],
     computed: {
+      browser() {
+        return this.$store.state.browser;
+      },
       appHref() {
-        const fullUrl = Browser.resolveUrl(this.browser, this.link.href);
+        const fullUrl = this.$store.getters.resolveUrl(this.link.href);
         return Application.constructLink(fullUrl);
       },
       title() {

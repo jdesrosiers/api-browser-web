@@ -5,41 +5,32 @@
 
 <script>
   import * as Application from "@/../lib/application";
-  import * as HttpParser from "@/../lib/parse-http";
   import hljs from "highlight.js";
   import "highlight.js/styles/default.css";
 
-  const parseLanguage = (subtypeName) => {
-    const matches = subtypeName.match(/(?:.*\+)?(.*)/);
-    return matches ? matches[1] : "";
-  };
-
   export default {
     name: "Code",
-    props: ["browser"],
     methods: {
       highlight(code) {
         return hljs.highlightAuto(code).value;
       }
     },
     computed: {
-      highlighted() {
-        if (!this.body || this.language === "html") {
-          return this.body;
-        } else if (this.language === "json") {
-          const formatted = Application.formatJson(this.body);
-          return this.highlight(formatted);
-        } else {
-          return this.highlight(this.body);
-        }
+      data() {
+        return this.$store.getters.data;
       },
       language() {
-        const contentType = this.browser.headers["content-type"] || "";
-        const subtypeName = HttpParser.subtypeName(contentType);
-        return parseLanguage(subtypeName);
+        return this.$store.getters.rootFormat;
       },
-      body() {
-        return this.browser.body;
+      highlighted() {
+        if (!this.data || this.language === "html") {
+          return this.data;
+        } else if (this.language === "json") {
+          const formatted = Application.formatJson(this.data);
+          return this.highlight(formatted);
+        } else {
+          return this.highlight(this.data);
+        }
       }
     }
   };

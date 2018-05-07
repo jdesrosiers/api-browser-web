@@ -1,33 +1,22 @@
 import { expect } from "chai";
-import { mount } from "@vue/test-utils";
-import { Given, When, Then, wait } from "@/../tests/unit/test-utils.js";
+import { mount, shallow, createLocalVue } from "@vue/test-utils";
+import { Given, When, Then, wait } from "@/../tests/unit/test-utils";
+import { browserFixture } from "@/../tests/unit/fixtures";
+import Vuex from "vuex";
 import App from "@/App.vue";
-import Delete from "@/components/Document/components/Delete.vue";
+import * as Application from "@/../lib/application";
 import Document from "@/components/Document/Document.vue";
 import Error from "@/components/Error.vue";
+import store from "@/store";
+import UrlBar from "@/components/UrlBar.vue";
 import WelcomeBanner from "@/components/WelcomeBanner.vue";
 
 
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
 Given("an App", () => {
   let app;
-
-  const hashUrl = "#http%3A%2F%2Fexample.com";
-  const url = "http://example.com";
-  const browser = {
-    location: new URL(url),
-    headers: { allow: "GET, DELETE" }
-  };
-
-  beforeEach(async () => {
-    window.location.hash = hashUrl;
-    await wait(0);
-
-    app = mount(App, {
-      methods: {
-        request: () => Promise.resolve(browser)
-      }
-    });
-  });
 
   afterEach(async () => {
     app.vm.$destroy();
@@ -35,10 +24,12 @@ Given("an App", () => {
     await wait(0);
   });
 
-  When("there is no response error", () => {
-    beforeEach(async () => {
-      window.location.hash = "";
+  When("there is no hash location", () => {
+    before(async () => {
+      Application.setLocation("");
       await wait(0);
+
+      app = shallow(App);
     });
 
     Then("it should display WelcomeBanner", () => {
@@ -54,12 +45,22 @@ Given("an App", () => {
     });
   });
 
-  When("there is a response", () => {
-    beforeEach(() => {
-      app.setData({ browser: "" });
+  When("a request is pending", () => {
+    before(async () => {
+      Application.setLocation("http://example.com");
+      await wait(0);
+
+      const Browser = browserFixture({
+        follow: () => new Promise((resolve) => setTimeout(resolve, 100, {}))
+      });
+
+      app = shallow(App, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
     });
 
-    Then("it should display WelcomeBanner", () => {
+    Then("it should not display WelcomeBanner", () => {
       expect(app.contains(WelcomeBanner)).to.equal(false);
     });
 
@@ -72,10 +73,19 @@ Given("an App", () => {
     });
   });
 
-  When("there is an error", () => {
-    const error = "some-error";
-    beforeEach(() => {
-      app.setData({ error });
+  When("a request is made and there is an error", () => {
+    before(async () => {
+      Application.setLocation("http://example.com");
+      await wait(0);
+
+      const Browser = browserFixture({
+        follow: () => Promise.reject("some-error")
+      });
+
+      app = shallow(App, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
     });
 
     Then("it should not display WelcomeBanner", () => {
@@ -92,86 +102,72 @@ Given("an App", () => {
   });
 
   When("a request is made and the request is successful", () => {
-    const anotherUrl = "http://another-example.com";
-    const expectedHashUrl = "#http%3A%2F%2Fanother-example.com";
-    let browser;
-
-    beforeEach(async () => {
-      browser = {};
-      app.setMethods({
-        request: () => Promise.resolve(browser)
-      });
-      app.setData({ url: anotherUrl });
-      app.find("input").trigger("keyup.enter");
+    before(async () => {
+      Application.setLocation("http://example.com");
       await wait(0);
-    });
 
-    Then("fetch the resource and put the result in browser", () => {
-      expect(app.vm.browser).to.equal(browser);
-    });
-
-    Then("there should not be an error message", () => {
-      expect(app.vm.error).to.equal(undefined);
-    });
-
-    Then("the hash location should be set to the url-encoded URL", () => {
-      expect(window.location.hash).to.equal(expectedHashUrl);
-    });
-  });
-
-  When("a request is made and the request fails", () => {
-    const anotherUrl = "http://another-example.com";
-
-    beforeEach(async () => {
-      app.setMethods({
-        request: () => Promise.reject("error")
+      const Browser = browserFixture({
+        follow: () => Promise.resolve({})
       });
-      app.setData({ url: anotherUrl });
-      app.find("input").trigger("keyup.enter");
-      await wait(0);
+
+      app = shallow(App, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
     });
 
-    Then("there should be an error message", () => {
-      expect(app.vm.error).to.have.string("error");
+    Then("it should not display WelcomeBanner", () => {
+      expect(app.contains(WelcomeBanner)).to.equal(false);
     });
-  });
 
-  When("the hash location exists when the component is mounted", () => {
-    Then("the hash location should be url-decoded and update the app URL", () => {
-      expect(app.vm.url).to.equal(url);
+    Then("it should display Document", () => {
+      expect(app.contains(Document)).to.equal(true);
+    });
+
+    Then("it should not display Error", () => {
+      expect(app.contains(Error)).to.equal(false);
     });
   });
 
   When("the hash location is changed after mount", () => {
-    const anotherHashUrl = "#http%3A%2F%2Fanother-example.com";
-    const expectedUrl = "http://another-example.com";
+    before(async () => {
+      const Browser = browserFixture({
+        follow: () => Promise.resolve({})
+      });
 
-    beforeEach(async () => {
-      window.location.hash = anotherHashUrl;
+      app = shallow(App, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
+
+      Application.setLocation("http://example.com");
       await wait(0);
     });
 
-    Then("it should be url-decoded and it should update the app URL", () => {
-      expect(app.vm.url).to.equal(expectedUrl);
+    Then("it should make a request for that URL", () => {
+      expect(app.contains(Document)).to.equal(true);
     });
   });
 
-  When("a delete event is received", () => {
-    let method;
-
-    beforeEach(() => {
-      app.setMethods({
-        request: (link) => {
-          method = link.method;
-          return Promise.resolve(browser);
-        }
+  When("a request is made from the UrlBar", () => {
+    before(async () => {
+      const Browser = browserFixture({
+        follow: () => Promise.reject("some-error")
       });
 
-      app.find(Delete).trigger("click");
+      app = mount(App, {
+        store: new Vuex.Store(store(Browser)),
+        localVue
+      });
+
+      const urlBar = app.find(UrlBar);
+      const input = urlBar.find("input");
+      input.element.value = "http://example.com";
+      input.trigger("keyup.enter");
     });
 
-    Then("it should make a DELETE request", () => {
-      expect(method).to.equal("DELETE");
+    Then("it should update the location", () => {
+      expect(Application.getLocation()).to.equal("http://example.com");
     });
   });
 });
